@@ -42,11 +42,30 @@ enum class WallpaperPreset(val title: String) {
 
 /**
  * Icon pack presets for HUBlub Launcher.
+ * Features 5 distinct styles spanning ultra-modern to vintage retro.
  */
 enum class IconPackStyle(val title: String) {
-    ANDROID_5_ROUND("Android 5.0 Lollipop Round (حزمة أندرويد 5 الدائرية - افتراضي)"),
-    SYSTEM_ORIGINAL("System Original (أيقونات النظام الأصلية)")
+    SYSTEM_FREEFORM("الشكل الحر الأصلي (Natural Freeform - بدون خلفية دائرية)"),
+    MATERIAL_YOU_SQUIRCLE("المربعات المنحنية الحديثة (Modern Squircle OneUI)"),
+    IOS_MINIMAL_FLAT("النمط الزجاجي المسطح الحديث (iOS Minimal Glass)"),
+    ANDROID_5_ROUND("أندرويد 5.0 لوليبوب الدائري (Lollipop Classic Round)"),
+    KITKAT_VINTAGE_RETRO("أندرويد 4.4 كيت كات ريترو كلاسيك (Vintage KitKat)")
 }
+
+/**
+ * Community Wallpaper item that users can publish, describe, and apply.
+ */
+data class CommunityWallpaper(
+    val id: String,
+    val title: String,
+    val author: String = "مستخدم اللانشر",
+    val description: String,
+    val imageUri: String? = null,
+    val preset: WallpaperPreset? = null,
+    val colorHex: Long = 0xFF009688,
+    val likesCount: Int = 24,
+    val timestamp: Long = System.currentTimeMillis()
+)
 
 /**
  * Drawer background transparency styles.
@@ -79,7 +98,8 @@ data class LauncherConfig(
     val showAppLabels: Boolean = true,
     val showClockWidget: Boolean = false,
     val wallpaperPreset: WallpaperPreset = WallpaperPreset.STOCK_LOLLIPOP,
-    val iconPack: IconPackStyle = IconPackStyle.ANDROID_5_ROUND,
+    val customWallpaperUri: String? = null,
+    val iconPack: IconPackStyle = IconPackStyle.SYSTEM_FREEFORM,
     val drawerStyle: DrawerStyle = DrawerStyle.TRANSLUCENT_GLASS,
     val performanceMode: Boolean = false,
     val nostalgiaMode: Boolean = true,

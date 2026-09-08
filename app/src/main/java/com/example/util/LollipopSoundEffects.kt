@@ -19,6 +19,7 @@ import kotlin.math.sin
 object LollipopSoundEffects {
 
     private var soundPool: SoundPool? = null
+    private var audioManager: android.media.AudioManager? = null
     private var waterDropSoundId: Int = 0
     private var buttonClickSoundId: Int = 0
     private var softPopSoundId: Int = 0
@@ -30,31 +31,34 @@ object LollipopSoundEffects {
     fun init(context: Context) {
         if (isInitialized) return
         try {
+            audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager
+
             val audioAttributes = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build()
 
             val sp = SoundPool.Builder()
-                .setMaxStreams(4)
+                .setMaxStreams(6)
                 .setAudioAttributes(audioAttributes)
                 .build()
 
             val cacheDir = context.cacheDir
-            val dropFile = File(cacheDir, "lollipop_drop.wav")
-            val clickFile = File(cacheDir, "lollipop_click.wav")
-            val popFile = File(cacheDir, "lollipop_pop.wav")
+            // v2 audio files with enhanced loudness and acoustic punch
+            val dropFile = File(cacheDir, "lollipop_drop_v2.wav")
+            val clickFile = File(cacheDir, "lollipop_click_v2.wav")
+            val popFile = File(cacheDir, "lollipop_pop_v2.wav")
 
             if (!dropFile.exists()) {
-                val dropPcm = generateWaterDropTone(880.0, 620.0, 32, 0.12f)
+                val dropPcm = generateWaterDropTone(920.0, 680.0, 42, 0.90f)
                 writeWavFile(dropFile, dropPcm)
             }
             if (!clickFile.exists()) {
-                val clickPcm = generateClickTone(1200.0, 16, 0.10f)
+                val clickPcm = generateClickTone(1350.0, 24, 0.92f)
                 writeWavFile(clickFile, clickPcm)
             }
             if (!popFile.exists()) {
-                val popPcm = generateWaterDropTone(560.0, 380.0, 38, 0.14f)
+                val popPcm = generateWaterDropTone(640.0, 420.0, 46, 0.90f)
                 writeWavFile(popFile, popPcm)
             }
 
@@ -151,42 +155,48 @@ object LollipopSoundEffects {
     }
 
     /**
-     * Plays gentle water droplet sound, throttled to prevent audio overlap during drags.
+     * Plays water droplet sound with prominent clarity.
      */
     fun playWaterDrop(enabled: Boolean = true) {
         if (!enabled) return
         val now = System.currentTimeMillis()
-        if (now - lastWaterDropTime < 85) return
+        if (now - lastWaterDropTime < 80) return
         lastWaterDropTime = now
 
-        val sp = soundPool ?: return
+        val sp = soundPool
         val id = waterDropSoundId
-        if (id != 0) {
-            sp.play(id, 0.55f, 0.55f, 1, 0, 1.0f)
+        if (sp != null && id != 0) {
+            sp.play(id, 1.0f, 1.0f, 1, 0, 1.0f)
+        } else {
+            audioManager?.playSoundEffect(android.view.SoundEffectConstants.CLICK)
         }
     }
 
     /**
-     * Plays tactile Material click sound.
+     * Plays tactile Material click sound with audible feedback.
      */
     fun playButtonClick(enabled: Boolean = true) {
         if (!enabled) return
-        val sp = soundPool ?: return
+        val sp = soundPool
         val id = buttonClickSoundId
-        if (id != 0) {
-            sp.play(id, 0.5f, 0.5f, 1, 0, 1.0f)
+        if (sp != null && id != 0) {
+            sp.play(id, 1.0f, 1.0f, 1, 0, 1.0f)
+        } else {
+            audioManager?.playSoundEffect(android.view.SoundEffectConstants.CLICK)
         }
     }
 
     /**
-     * Plays soft pop sound for transitions.
+     * Plays crisp pop sound for transitions.
      */
     fun playSoftPop(enabled: Boolean = true) {
         if (!enabled) return
-        val sp = soundPool ?: return
+        val sp = soundPool
         val id = softPopSoundId
-        if (id != 0) {
-            sp.play(id, 0.6f, 0.6f, 1, 0, 1.0f)
+        if (sp != null && id != 0) {
+            sp.play(id, 1.0f, 1.0f, 1, 0, 1.0f)
+        } else {
+            audioManager?.playSoundEffect(android.view.SoundEffectConstants.CLICK)
         }
     }
 }

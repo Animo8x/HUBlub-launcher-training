@@ -28,7 +28,7 @@ import kotlinx.coroutines.withContext
  */
 object AppManager {
 
-    private const val MAX_ICON_CACHE_SIZE = 120
+    private const val MAX_ICON_CACHE_SIZE = 600
     private val iconCache = object : LruCache<String, ImageBitmap>(MAX_ICON_CACHE_SIZE) {}
 
     /**

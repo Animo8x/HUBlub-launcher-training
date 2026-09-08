@@ -154,30 +154,24 @@ fun LollipopSettingsDialog(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Appearance & Wallpapers
-                    SectionHeader("WALLPAPER & THEME")
-
-                    Text("Wallpaper Style:", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTextPrimary)
-                    WallpaperPreset.values().forEach { preset ->
+                    // Appearance & Themes Notice
+                    SectionHeader("THEMES & WALLPAPERS (الثيمات والخلفيات)")
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE0F2F1)),
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    LollipopSoundEffects.playWaterDrop()
-                                    onConfigChange(config.copy(wallpaperPreset = preset))
-                                }
-                                .padding(vertical = 2.dp),
+                            modifier = Modifier.padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            RadioButton(
-                                selected = config.wallpaperPreset == preset,
-                                onClick = {
-                                    LollipopSoundEffects.playWaterDrop()
-                                    onConfigChange(config.copy(wallpaperPreset = preset))
-                                },
-                                colors = RadioButtonDefaults.colors(selectedColor = LollipopTeal700)
+                            Icon(imageVector = Icons.Default.Palette, contentDescription = null, tint = LollipopTeal700)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "تم نقل كافة خلفيات الشاشة وخلفيات المجتمع وحزم الأيقونات إلى تطبيق \"الثيمات\" المخصص المتاح في درج التطبيقات والشاشة الرئيسية.",
+                                fontSize = 12.sp,
+                                color = MaterialTextPrimary
                             )
-                            Text(text = preset.title, fontSize = 14.sp, color = MaterialTextPrimary)
                         }
                     }
 
@@ -280,7 +274,13 @@ fun LollipopSettingsDialog(
                                     color = if (isSelected) LollipopTeal700 else MaterialTextPrimary
                                 )
                                 Text(
-                                    text = if (pack == IconPackStyle.ANDROID_5_ROUND) "أيقونات أندرويد 5 الدائرية للماتيريال ديزاين (Moonshine Round)" else "أيقونات التطبيقات الأصلية للنظام",
+                                    text = when (pack) {
+                                        IconPackStyle.SYSTEM_FREEFORM -> "الشكل الحر الأصلي (المربع مربع والدائري دائري بدون أي خلفية دائرية بيضاء) ★ الافتراضي"
+                                        IconPackStyle.MATERIAL_YOU_SQUIRCLE -> "نمط المربعات المنحنية الحديثة (Modern Squircle)"
+                                        IconPackStyle.IOS_MINIMAL_FLAT -> "نمط البطاقات الزجاجية المسطحة (iOS Minimal Flat)"
+                                        IconPackStyle.ANDROID_5_ROUND -> "أندرويد 5.0 لوليبوب الدائري الكلاسيكي الأصلي لعام 2014"
+                                        IconPackStyle.KITKAT_VINTAGE_RETRO -> "أندرويد 4.4 كيت كات ريترو كلاسيك (Retro Vintage KitKat)"
+                                    },
                                     fontSize = 12.sp,
                                     color = MaterialTextSecondary
                                 )
@@ -396,9 +396,9 @@ fun LollipopSettingsDialog(
 
                     // About
                     SectionHeader("ABOUT HUBLUB LAUNCHER")
-                    Text("HUBlub Launcher v1.2.0 (Lollipop Round Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
+                    Text("HUBlub Launcher v2.5 (Lollipop 5.0 Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
                     Text(
-                        "An authentic Android 5.0 Lollipop Native Launcher experience with circular icon pack, water ripple touch effects, and original Material 1.0 design.",
+                        "An authentic Android 5.0 Lollipop Native Launcher experience with freeform & 5 icon packs, expandable drawer search, dedicated themes app, and original Material Design.",
                         fontSize = 12.sp,
                         color = MaterialTextSecondary,
                         modifier = Modifier.padding(top = 2.dp)
@@ -496,8 +496,21 @@ fun LollipopSettingsDialog(
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
+                    // v2.5
+                    Text("v2.5 (lollipop 5.0 - الإصدار الأحدث)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("• الشكل الحر الطبيعي للأيقونات بدون أي خلفية دائرية بيضاء إجبارية.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• توفير 5 حزم أيقونات متنوعة من الحديث للريترو كلاسيك.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• زر مكبر كأيقونة بحث قابلة للفتح والإغلاق في درج التطبيقات بدلاً من الشريط القديم.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• نقل الخلفيات إلى تطبيق \"الثيمات\" المستقل وإمكانية نشر ومشاركة الخلفيات للمجتمع مع الاسم والوصف.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• إتاحة الإعدادات كتطبيق مستقل في درج التطبيقات والشاشة الرئيسية.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• تحسين فائق في سرعة واستجابة درج التطبيقات وتخفيف الحمل على المعالج.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0x1F000000))
+                    Spacer(modifier = Modifier.height(12.dp))
+
                     // v1.2.0
-                    Text("v1.2.0 (أحدث إصدار - Latest)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("v1.2.0 (مستقر)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextSecondary)
                     Text("• حزمة أيقونات أندرويد 5 الدائرية كحزمة افتراضية.", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• ضبط دقيق لحجم موجة قطرة الماء لتكون منطقية وطبيعية (~44dp).", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• خيار التبديل بين الأيقونات الدائرية وأيقونات النظام في الإعدادات.", fontSize = 13.sp, color = MaterialTextPrimary)

@@ -91,6 +91,7 @@ fun HomeScreen(
     val selectedAppForMenu by viewModel.selectedAppForMenu.collectAsState()
     val selectedShortcutForMenu by viewModel.selectedShortcutForMenu.collectAsState()
     val isFirstRunDialogOpen by viewModel.isFirstRunDialogOpen.collectAsState()
+    val communityWallpapers by viewModel.communityWallpapers.collectAsState()
 
     // Intercept back button: close drawer/settings/themes/picker before exiting
     BackHandler(enabled = isDrawerOpen || isSettingsOpen || isThemesAppOpen || isWidgetPickerOpen) {
@@ -222,10 +223,10 @@ fun HomeScreen(
                                 icon = icon,
                                 packageName = shortcut.packageName,
                                 onClick = {
-                                    if (shortcut.packageName == "com.example.themes") {
-                                        viewModel.openThemesApp()
-                                    } else {
-                                        AppManager.launchApp(context, shortcut.packageName)
+                                    when (shortcut.packageName) {
+                                        "com.example.themes" -> viewModel.openThemesApp()
+                                        "com.example.launcher.settings" -> viewModel.openSettings()
+                                        else -> AppManager.launchApp(context, shortcut.packageName)
                                     }
                                 },
                                 onLongClick = {
@@ -275,10 +276,10 @@ fun HomeScreen(
                 LollipopDock(
                     dockApps = dockAppList,
                     onAppClick = { app ->
-                        if (app.packageName == "com.example.themes") {
-                            viewModel.openThemesApp()
-                        } else {
-                            AppManager.launchApp(context, app.packageName)
+                        when (app.packageName) {
+                            "com.example.themes" -> viewModel.openThemesApp()
+                            "com.example.launcher.settings" -> viewModel.openSettings()
+                            else -> AppManager.launchApp(context, app.packageName)
                         }
                     },
                     onAppLongClick = { app ->
@@ -300,12 +301,19 @@ fun HomeScreen(
             searchQuery = searchQuery,
             onSearchQueryChange = { viewModel.setSearchQuery(it) },
             onAppClick = { app ->
-                if (app.packageName == "com.example.themes") {
-                    viewModel.closeDrawer()
-                    viewModel.openThemesApp()
-                } else {
-                    AppManager.launchApp(context, app.packageName)
-                    viewModel.closeDrawer()
+                when (app.packageName) {
+                    "com.example.themes" -> {
+                        viewModel.closeDrawer()
+                        viewModel.openThemesApp()
+                    }
+                    "com.example.launcher.settings" -> {
+                        viewModel.closeDrawer()
+                        viewModel.openSettings()
+                    }
+                    else -> {
+                        AppManager.launchApp(context, app.packageName)
+                        viewModel.closeDrawer()
+                    }
                 }
             },
             onAppLongClick = { app ->
@@ -337,10 +345,10 @@ fun HomeScreen(
                 isFavorite = isFavorite,
                 isInDock = isInDock,
                 onOpen = {
-                    if (menuApp.packageName == "com.example.themes") {
-                        viewModel.openThemesApp()
-                    } else {
-                        AppManager.launchApp(context, menuApp.packageName)
+                    when (menuApp.packageName) {
+                        "com.example.themes" -> viewModel.openThemesApp()
+                        "com.example.launcher.settings" -> viewModel.openSettings()
+                        else -> AppManager.launchApp(context, menuApp.packageName)
                     }
                     viewModel.closeAppMenu()
                 },
@@ -381,6 +389,13 @@ fun HomeScreen(
                 onConfigChange = { viewModel.updateConfig(it) },
                 onOpenWidgetPicker = {
                     viewModel.openWidgetPicker()
+                },
+                communityWallpapers = communityWallpapers,
+                onPublishWallpaper = { title, author, desc, preset ->
+                    viewModel.publishCommunityWallpaper(title, author, desc, preset)
+                },
+                onApplyWallpaper = { preset, uri ->
+                    viewModel.applyWallpaper(preset, uri)
                 },
                 onClose = { viewModel.closeThemesApp() }
             )

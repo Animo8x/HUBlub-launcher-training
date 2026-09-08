@@ -55,7 +55,7 @@ fun LollipopAppItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
-    iconPack: IconPackStyle = IconPackStyle.ANDROID_5_ROUND,
+    iconPack: IconPackStyle = IconPackStyle.SYSTEM_FREEFORM,
     iconSize: Dp = 56.dp,
     showLabel: Boolean = true,
     isOnWallpaper: Boolean = true,
@@ -64,31 +64,24 @@ fun LollipopAppItem(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.88f else 1.0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "app_item_press_scale"
-    )
-
-    val textShadow = if (isOnWallpaper) {
-        Shadow(
-            color = Color(0x99000000),
-            offset = Offset(1f, 2f),
-            blurRadius = 3f
-        )
-    } else null
+    val textShadow = remember(isOnWallpaper) {
+        if (isOnWallpaper) {
+            Shadow(
+                color = Color(0x99000000),
+                offset = Offset(1f, 2f),
+                blurRadius = 3f
+            )
+        } else null
+    }
 
     Column(
         modifier = modifier
             .testTag("app_item_$packageName")
             .graphicsLayer {
+                val scale = if (isPressed) 0.90f else 1.0f
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(CircleShape)
             .combinedClickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -101,7 +94,7 @@ fun LollipopAppItem(
                     onLongClick()
                 }
             )
-            .padding(vertical = 6.dp, horizontal = 4.dp),
+            .padding(vertical = 4.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

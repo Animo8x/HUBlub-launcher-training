@@ -2,11 +2,13 @@ package com.example.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Calculate
@@ -26,6 +28,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -227,11 +230,11 @@ fun LollipopAppIconView(
     packageName: String,
     systemIcon: ImageBitmap?,
     modifier: Modifier = Modifier,
-    iconPack: IconPackStyle = IconPackStyle.ANDROID_5_ROUND,
+    iconPack: IconPackStyle = IconPackStyle.SYSTEM_FREEFORM,
     size: Dp = 56.dp
 ) {
-    // Check if this is the built-in Themes app
-    if (packageName == "com.example.themes" || label == "Themes" || label == "الثيمات") {
+    // 1. Built-in dedicated Themes App
+    if (packageName == "com.example.themes" || label == "Themes" || label == "الثيمات (Themes)" || label == "الثيمات") {
         Surface(
             shape = CircleShape,
             color = Color(0xFF009688), // Lollipop Teal
@@ -247,7 +250,7 @@ fun LollipopAppIconView(
                 Icon(
                     imageVector = Icons.Default.PhotoLibrary,
                     contentDescription = label,
-                    tint = Color(0xFFFFEB3B), // Vibrant amber accent
+                    tint = Color(0xFFFFEB3B), // Amber accent
                     modifier = Modifier.size(size * 0.58f)
                 )
             }
@@ -255,109 +258,225 @@ fun LollipopAppIconView(
         return
     }
 
-    if (iconPack == IconPackStyle.ANDROID_5_ROUND) {
-        if (systemIcon != null) {
-            // Android 5.0 Circular Material representation of the REAL app icon:
-            // YouTube is YouTube, Messenger is Messenger, Chrome is Chrome!
-            // Cleanly presented inside a subtle circular paper container with Material elevation
-            Surface(
-                shape = CircleShape,
-                color = Color.White,
-                shadowElevation = 2.dp,
-                modifier = modifier
-                    .size(size)
-                    .clip(CircleShape)
+    // 2. Built-in dedicated Settings App
+    if (packageName == "com.example.launcher.settings" || label.contains("إعدادات اللانشر") || label == "HUBlub Settings") {
+        Surface(
+            shape = RoundedCornerShape(14.dp),
+            color = Color(0xFF3F51B5), // Lollipop Indigo 500
+            shadowElevation = 3.dp,
+            modifier = modifier
+                .size(size)
+                .clip(RoundedCornerShape(14.dp))
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(size * 0.12f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        bitmap = systemIcon,
-                        contentDescription = label,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Tune,
+                    contentDescription = label,
+                    tint = Color(0xFFFFD54F), // Warm gold
+                    modifier = Modifier.size(size * 0.58f)
+                )
             }
-        } else {
-            // Only fallback to canonical vector or letter if system icon is genuinely missing
-            val canonicalDef = LollipopIconPack.resolveCanonicalIcon(packageName, label)
-            if (canonicalDef != null) {
+        }
+        return
+    }
+
+    // 3. Render icon according to chosen IconPackStyle
+    when (iconPack) {
+        IconPackStyle.SYSTEM_FREEFORM -> {
+            // Freeform Natural: Render the app icon in its true native shape (square, circle, adaptive, whatever it is)
+            // NO forced white circular plate behind square apps!
+            if (systemIcon != null) {
+                Image(
+                    bitmap = systemIcon,
+                    contentDescription = label,
+                    contentScale = ContentScale.Fit,
+                    modifier = modifier
+                        .size(size)
+                        .padding(1.dp)
+                )
+            } else {
+                RenderFallbackLetter(label, size, modifier, shape = RoundedCornerShape(12.dp))
+            }
+        }
+
+        IconPackStyle.MATERIAL_YOU_SQUIRCLE -> {
+            // Modern Android / OneUI Squircle Style
+            if (systemIcon != null) {
                 Surface(
-                    shape = CircleShape,
-                    color = canonicalDef.backgroundColor,
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color.White,
                     shadowElevation = 2.dp,
                     modifier = modifier
                         .size(size)
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(16.dp))
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(size * 0.10f),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = canonicalDef.iconVector,
+                        Image(
+                            bitmap = systemIcon,
                             contentDescription = label,
-                            tint = canonicalDef.iconTint,
-                            modifier = Modifier.size(size * 0.54f)
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
             } else {
-                val firstLetter = label.firstOrNull()?.uppercase() ?: "?"
-                val bgColor = LollipopIconPack.getFallbackColor(label)
+                RenderFallbackLetter(label, size, modifier, shape = RoundedCornerShape(16.dp))
+            }
+        }
+
+        IconPackStyle.IOS_MINIMAL_FLAT -> {
+            // iOS Minimal Glass Smooth Rounded Rect
+            if (systemIcon != null) {
+                Surface(
+                    shape = RoundedCornerShape(13.dp),
+                    color = Color(0xFFF7F9FA),
+                    shadowElevation = 1.5.dp,
+                    modifier = modifier
+                        .size(size)
+                        .clip(RoundedCornerShape(13.dp))
+                        .border(0.5.dp, Color(0x22000000), RoundedCornerShape(13.dp))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(size * 0.08f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            bitmap = systemIcon,
+                            contentDescription = label,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            } else {
+                RenderFallbackLetter(label, size, modifier, shape = RoundedCornerShape(13.dp))
+            }
+        }
+
+        IconPackStyle.ANDROID_5_ROUND -> {
+            // Classic Android 5.0 Lollipop Circular Paper Container
+            if (systemIcon != null) {
                 Surface(
                     shape = CircleShape,
-                    color = bgColor,
+                    color = Color.White,
                     shadowElevation = 2.dp,
                     modifier = modifier
                         .size(size)
                         .clip(CircleShape)
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(size * 0.12f),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = firstLetter,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = (size.value * 0.44f).sp
+                        Image(
+                            bitmap = systemIcon,
+                            contentDescription = label,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
+            } else {
+                val canonicalDef = LollipopIconPack.resolveCanonicalIcon(packageName, label)
+                if (canonicalDef != null) {
+                    Surface(
+                        shape = CircleShape,
+                        color = canonicalDef.backgroundColor,
+                        shadowElevation = 2.dp,
+                        modifier = modifier
+                            .size(size)
+                            .clip(CircleShape)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = canonicalDef.iconVector,
+                                contentDescription = label,
+                                tint = canonicalDef.iconTint,
+                                modifier = Modifier.size(size * 0.54f)
+                            )
+                        }
+                    }
+                } else {
+                    RenderFallbackLetter(label, size, modifier, shape = CircleShape)
+                }
             }
         }
-    } else {
-        // System Original Icons
-        if (systemIcon != null) {
-            Image(
-                bitmap = systemIcon,
-                contentDescription = label,
-                contentScale = ContentScale.Fit,
-                modifier = modifier
-                    .size(size)
-                    .padding(2.dp)
-            )
-        } else {
-            val firstLetter = label.firstOrNull()?.uppercase() ?: "?"
-            Box(
-                modifier = modifier
-                    .size(size)
-                    .clip(CircleShape)
-                    .background(Color(0xFF009688)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = firstLetter,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = (size.value * 0.45f).sp
-                )
+
+        IconPackStyle.KITKAT_VINTAGE_RETRO -> {
+            // Vintage Android 4.4 Holo / KitKat Style
+            if (systemIcon != null) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = Color(0xFF1E272C),
+                    shadowElevation = 2.dp,
+                    modifier = modifier
+                        .size(size)
+                        .clip(RoundedCornerShape(4.dp))
+                        .border(1.dp, Color(0xFF33B5E5).copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(size * 0.10f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            bitmap = systemIcon,
+                            contentDescription = label,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            } else {
+                RenderFallbackLetter(label, size, modifier, shape = RoundedCornerShape(4.dp))
             }
+        }
+    }
+}
+
+@Composable
+private fun RenderFallbackLetter(
+    label: String,
+    size: Dp,
+    modifier: Modifier,
+    shape: androidx.compose.ui.graphics.Shape
+) {
+    val firstLetter = label.firstOrNull()?.uppercase() ?: "?"
+    val bgColor = LollipopIconPack.getFallbackColor(label)
+    Surface(
+        shape = shape,
+        color = bgColor,
+        shadowElevation = 2.dp,
+        modifier = modifier
+            .size(size)
+            .clip(shape)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = firstLetter,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = (size.value * 0.44f).sp
+            )
         }
     }
 }

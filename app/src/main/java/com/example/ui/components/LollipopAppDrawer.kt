@@ -42,6 +42,10 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -74,48 +78,39 @@ fun LollipopAppDrawer(
     onAppClick: (AppInfo) -> Unit,
     onAppLongClick: (AppInfo) -> Unit,
     onCloseClick: () -> Unit,
-    onSettingsClick: () -> Unit,
+    onSettingsClick: () -> Unit = {},
     modifier: Modifier = Modifier,
-    iconPack: IconPackStyle = IconPackStyle.ANDROID_5_ROUND,
+    iconPack: IconPackStyle = IconPackStyle.SYSTEM_FREEFORM,
     drawerStyle: DrawerStyle = DrawerStyle.TRANSLUCENT_GLASS,
     columns: Int = 4,
     iconSize: Dp = 52.dp,
     showLabels: Boolean = true,
     isDarkTheme: Boolean = false
 ) {
+    var isSearchExpanded by remember { mutableStateOf(searchQuery.isNotEmpty()) }
+
     AnimatedVisibility(
         visible = isOpen,
         enter = slideInVertically(
-            initialOffsetY = { it / 3 },
-            animationSpec = tween(320, easing = FastOutSlowInEasing)
-        ) + scaleIn(
-            initialScale = 0.92f,
-            animationSpec = tween(320, easing = FastOutSlowInEasing)
+            initialOffsetY = { it },
+            animationSpec = tween(260, easing = FastOutSlowInEasing)
         ) + fadeIn(
-            animationSpec = tween(240)
+            animationSpec = tween(180)
         ),
         exit = slideOutVertically(
-            targetOffsetY = { it / 3 },
-            animationSpec = tween(260, easing = FastOutSlowInEasing)
-        ) + scaleOut(
-            targetScale = 0.92f,
-            animationSpec = tween(260, easing = FastOutSlowInEasing)
+            targetOffsetY = { it },
+            animationSpec = tween(220, easing = FastOutSlowInEasing)
         ) + fadeOut(
-            animationSpec = tween(200)
+            animationSpec = tween(160)
         ),
         modifier = modifier.fillMaxSize()
     ) {
         // Compute translucent background according to selected DrawerStyle
         val backgroundColor = when (drawerStyle) {
-            DrawerStyle.TRANSLUCENT_GLASS -> Color(0xB8102027) // ~72% glass opacity, showing wallpaper through
-            DrawerStyle.SEMI_TRANSPARENT -> Color(0x80102027) // 50% opacity
-            DrawerStyle.CRYSTAL_CLEAR -> Color(0x38102027) // 22% crystal opacity
+            DrawerStyle.TRANSLUCENT_GLASS -> Color(0xD0121E24) // Sleek dark glass showing wallpaper
+            DrawerStyle.SEMI_TRANSPARENT -> Color(0x90121E24)
+            DrawerStyle.CRYSTAL_CLEAR -> Color(0x40121E24)
             DrawerStyle.CLASSIC_SOLID -> if (isDarkTheme) Color(0xFF263238) else MaterialCardWhite
-        }
-
-        val topBarColor = when (drawerStyle) {
-            DrawerStyle.CLASSIC_SOLID -> LollipopTeal700
-            else -> Color(0xDD00796B)
         }
 
         val textColor = if (drawerStyle != DrawerStyle.CLASSIC_SOLID || isDarkTheme) Color.White else MaterialTextPrimary
@@ -124,116 +119,126 @@ fun LollipopAppDrawer(
             modifier = Modifier
                 .fillMaxSize()
                 .testTag("lollipop_app_drawer"),
-            color = backgroundColor,
-            shadowElevation = 8.dp
+            color = backgroundColor
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .windowInsetsPadding(WindowInsets.navigationBars)
             ) {
-                // Top AppBar in Lollipop Teal style
+                // Sleek Modern App Drawer Header (No bulky old green bar, no gear icon)
                 Surface(
-                    color = topBarColor,
-                    shadowElevation = 4.dp,
+                    color = Color(0x33000000),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .windowInsetsPadding(WindowInsets.statusBars)
-                            .padding(top = 8.dp, bottom = 12.dp, start = 8.dp, end = 8.dp)
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(
-                                    onClick = {
-                                        LollipopSoundEffects.playSoftPop()
-                                        onCloseClick()
-                                    },
-                                    modifier = Modifier.testTag("drawer_back_button")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Close Drawer",
-                                        tint = Color.White
-                                    )
+                        IconButton(
+                            onClick = {
+                                LollipopSoundEffects.playSoftPop()
+                                if (isSearchExpanded) {
+                                    isSearchExpanded = false
+                                    onSearchQueryChange("")
+                                } else {
+                                    onCloseClick()
                                 }
-                                Text(
-                                    text = "APPS (${apps.size})",
-                                    color = Color.White,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    letterSpacing = 1.sp,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-
-                            IconButton(
-                                onClick = {
-                                    LollipopSoundEffects.playSoftPop()
-                                    onSettingsClick()
-                                },
-                                modifier = Modifier.testTag("drawer_settings_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Settings,
-                                    contentDescription = "Launcher Settings",
-                                    tint = Color.White
-                                )
-                            }
+                            },
+                            modifier = Modifier.testTag("drawer_back_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = Color.White
+                            )
                         }
 
-                        // Search Field inside drawer
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = onSearchQueryChange,
-                            placeholder = {
-                                Text(
-                                    text = "Search apps...",
-                                    color = Color(0x99FFFFFF),
-                                    fontSize = 14.sp
-                                )
-                            },
-                            leadingIcon = {
+                        if (!isSearchExpanded) {
+                            // Title & App Count
+                            Text(
+                                text = "التطبيقات (${apps.size})",
+                                color = Color.White,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 6.dp)
+                            )
+
+                            // Magnifying Glass Search Button ("زر مكبر كأيقونة للبحث")
+                            IconButton(
+                                onClick = {
+                                    LollipopSoundEffects.playButtonClick()
+                                    isSearchExpanded = true
+                                },
+                                modifier = Modifier.testTag("drawer_search_toggle_button")
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = "Search",
                                     tint = Color.White
                                 )
-                            },
-                            trailingIcon = {
-                                if (searchQuery.isNotEmpty()) {
-                                    IconButton(onClick = { onSearchQueryChange("") }) {
+                            }
+                        } else {
+                            // Expandable Clean Search Bar
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = onSearchQueryChange,
+                                placeholder = {
+                                    Text(
+                                        text = "البحث عن التطبيقات...",
+                                        color = Color(0xAAFFFFFF),
+                                        fontSize = 14.sp
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = "Search",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                },
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = {
+                                            if (searchQuery.isNotEmpty()) {
+                                                onSearchQueryChange("")
+                                            } else {
+                                                isSearchExpanded = false
+                                            }
+                                        }
+                                    ) {
                                         Icon(
                                             imageVector = Icons.Default.Clear,
                                             contentDescription = "Clear",
-                                            tint = Color.White
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
                                         )
                                     }
-                                }
-                            },
-                            singleLine = true,
-                            shape = RoundedCornerShape(4.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color.White,
-                                unfocusedBorderColor = Color(0x66FFFFFF),
-                                cursorColor = Color.White,
-                                focusedContainerColor = Color(0x22000000),
-                                unfocusedContainerColor = Color(0x15000000)
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp)
-                                .padding(horizontal = 8.dp)
-                                .testTag("drawer_search_input")
-                        )
+                                },
+                                singleLine = true,
+                                shape = RoundedCornerShape(24.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    focusedBorderColor = Color(0x66FFFFFF),
+                                    unfocusedBorderColor = Color(0x33FFFFFF),
+                                    cursorColor = Color.White,
+                                    focusedContainerColor = Color(0x33000000),
+                                    unfocusedContainerColor = Color(0x22000000)
+                                ),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp)
+                                    .padding(end = 4.dp)
+                                    .testTag("drawer_search_input")
+                            )
+                        }
                     }
                 }
 
