@@ -1,0 +1,84 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 45-degree Android 5.0 Lollipop Material Long Shadow -->
+    <path
+        android:pathData="M38,40 L68,70 L68,88 L38,88 Z"
+        android:fillColor="#1A004D40" />
+
+    <path
+        android:pathData="M54,34 L82,62 L74,88 L46,88 Z"
+        android:fillColor="#15000000" />
+
+    <!-- Lollipop Candy Stick (Diagonal Paper Stripe) -->
+    <!-- Shadow for the stick -->
+    <path
+        android:pathData="M51,60 L38,88 L44,91 L57,63 Z"
+        android:fillColor="#B0BEC5" />
+    <!-- White Stick -->
+    <path
+        android:pathData="M50,59 L37,87 L43,90 L56,62 Z"
+        android:fillColor="#ECEFF1" />
+
+    <!-- Outer Flat Circle (Android 5.0 Material Paper Circle) -->
+    <!-- Base shadow ring -->
+    <path
+        android:pathData="M54,20
+            A26,26 0 1 1 53.9,20 Z"
+        android:fillColor="#00695C" />
+
+    <!-- Vibrant Material Teal/Cyan Circle (Elevation 2) -->
+    <path
+        android:pathData="M54,21
+            A25,25 0 1 1 53.9,21 Z"
+        android:fillColor="#009688" />
+
+    <!-- Candy Swirl Spiral (2D Flat Clean Geometric Lollipop Swirl) -->
+    <!-- Cyan Swirl Segment -->
+    <path
+        android:pathData="M54,21
+            A25,25 0 0 1 79,46
+            L54,46 Z"
+        android:fillColor="#00BCD4" />
+
+    <path
+        android:pathData="M54,46
+            L29,46
+            A25,25 0 0 1 54,21 Z"
+        android:fillColor="#4DB6AC" />
+
+    <path
+        android:pathData="M54,46
+            L54,71
+            A25,25 0 0 1 29,46 Z"
+        android:fillColor="#00897B" />
+
+    <path
+        android:pathData="M54,46
+            L79,46
+            A25,25 0 0 1 54,71 Z"
+        android:fillColor="#26A69A" />
+
+    <!-- Inner Clean White Lollipop Ring (Authentic 2D Material Design) -->
+    <path
+        android:pathData="M54,34
+            A12,12 0 1 1 53.9,34 Z"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Center Lollipop Candy Dot (Material Accent Pink / Orange) -->
+    <path
+        android:pathData="M54,40
+            A6,6 0 1 1 53.9,40 Z"
+        android:fillColor="#FF5722" />
+
+    <!-- Subtle Material Paper Top Highlight Curve -->
+    <path
+        android:pathData="M31,38
+            A25,25 0 0 1 72,28
+            A25,25 0 0 0 35,42 Z"
+        android:fillColor="#40FFFFFF" />
+
+</vector>

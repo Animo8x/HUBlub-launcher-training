@@ -1,0 +1,6 @@
+{
+  "name": "HUBlub Launcher",
+  "description": "Native Android 5.x Lollipop-inspired home launcher with real package discovery and authentic Material 1.0 design.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
