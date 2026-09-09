@@ -95,8 +95,8 @@ object AppManager {
             )
         }
 
-        // Sort alphabetically according to classic Lollipop App Drawer
-        appList.sortedBy { it.label.lowercase() }
+        // Deduplicate and sort alphabetically according to classic Lollipop App Drawer
+        appList.distinctBy { it.packageName }.sortedBy { it.label.lowercase() }
     }
 
     /**

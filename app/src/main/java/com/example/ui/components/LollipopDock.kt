@@ -62,8 +62,10 @@ fun LollipopDock(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // First 2 dock apps
-            val leftApps = dockApps.take(2)
+            val half = (dockApps.size + 1) / 2
+            val leftApps = dockApps.take(half)
+            val rightApps = dockApps.drop(half)
+
             for (app in leftApps) {
                 LollipopAppItem(
                     label = app.label,
@@ -79,21 +81,12 @@ fun LollipopDock(
                 )
             }
 
-            // Fill slot if less than 2
-            if (leftApps.size < 2) {
-                repeat(2 - leftApps.size) {
-                    Box(modifier = Modifier.size(56.dp))
-                }
-            }
-
             // Iconic Android 5.0 Lollipop App Drawer Launcher Button
             LollipopAppDrawerButton(
                 onClick = onOpenDrawerClick,
                 modifier = Modifier.size(56.dp)
             )
 
-            // Next 2 dock apps
-            val rightApps = dockApps.drop(2).take(2)
             for (app in rightApps) {
                 LollipopAppItem(
                     label = app.label,
@@ -107,13 +100,6 @@ fun LollipopDock(
                     isOnWallpaper = true,
                     modifier = Modifier.size(56.dp)
                 )
-            }
-
-            // Fill slot if less than 2
-            if (rightApps.size < 2) {
-                repeat(2 - rightApps.size) {
-                    Box(modifier = Modifier.size(56.dp))
-                }
             }
         }
     }

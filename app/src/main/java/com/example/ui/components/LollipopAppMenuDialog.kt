@@ -129,7 +129,7 @@ fun LollipopAppMenuDialog(
                 MenuActionItem(
                     icon = Icons.Default.OpenInNew,
                     iconTint = LollipopTeal700,
-                    text = "Open App",
+                    text = "فتح التطبيق (Open App)",
                     testTag = "menu_open_app",
                     onClick = onOpen
                 )
@@ -138,7 +138,7 @@ fun LollipopAppMenuDialog(
                     MenuActionItem(
                         icon = Icons.Default.PlaylistRemove,
                         iconTint = LollipopDeepOrange500,
-                        text = "Remove from Home",
+                        text = "إزالة من الصفحة (Remove from Home)",
                         testTag = "menu_remove_from_home",
                         onClick = onRemoveFromHome
                     )
@@ -146,7 +146,7 @@ fun LollipopAppMenuDialog(
                     MenuActionItem(
                         icon = Icons.Default.PlaylistAdd,
                         iconTint = LollipopTeal500,
-                        text = "Add to Home Screen",
+                        text = "إضافة إلى الصفحة (Add to Home)",
                         testTag = "menu_add_to_home",
                         onClick = onAddToHome
                     )
@@ -155,7 +155,7 @@ fun LollipopAppMenuDialog(
                 MenuActionItem(
                     icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     iconTint = if (isFavorite) LollipopDeepOrange500 else MaterialTextSecondary,
-                    text = if (isFavorite) "Remove from Favorites" else "Add to Favorites",
+                    text = if (isFavorite) "إزالة من المفضلة (Remove from Favorites)" else "إضافة إلى المفضلة (Add to Favorites)",
                     testTag = "menu_toggle_favorite",
                     onClick = onToggleFavorite
                 )
@@ -163,7 +163,7 @@ fun LollipopAppMenuDialog(
                 MenuActionItem(
                     icon = Icons.Default.Star,
                     iconTint = if (isInDock) LollipopAmber500 else MaterialTextSecondary,
-                    text = if (isInDock) "Remove from Dock" else "Add to Dock",
+                    text = if (isInDock) "إزالة من الشريط السفلي (Remove from Dock)" else "إضافة إلى الشريط السفلي (Add to Dock)",
                     testTag = "menu_toggle_dock",
                     onClick = onToggleDock
                 )
@@ -171,7 +171,7 @@ fun LollipopAppMenuDialog(
                 MenuActionItem(
                     icon = Icons.Default.Info,
                     iconTint = LollipopTeal700,
-                    text = "App Info",
+                    text = "معلومات التطبيق (App Info)",
                     testTag = "menu_app_info",
                     onClick = onAppInfo
                 )
@@ -180,7 +180,7 @@ fun LollipopAppMenuDialog(
                     MenuActionItem(
                         icon = Icons.Default.Delete,
                         iconTint = LollipopDeepOrange500,
-                        text = "Uninstall",
+                        text = "إلغاء التثبيت (Uninstall)",
                         testTag = "menu_uninstall",
                         onClick = onUninstall
                     )

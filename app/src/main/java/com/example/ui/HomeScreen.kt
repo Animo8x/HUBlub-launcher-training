@@ -108,6 +108,11 @@ fun HomeScreen(
         installedApps.associateBy { it.packageName }
     }
 
+    // Prepare favorite apps list
+    val favoriteApps = remember(installedApps, favoritePackages) {
+        installedApps.filter { favoritePackages.contains(it.packageName) }
+    }
+
     // Prepare dock apps list
     val dockAppList = remember(dockPackages, appMap) {
         dockPackages.mapNotNull { appMap[it] }
@@ -127,7 +132,10 @@ fun HomeScreen(
             .testTag("home_screen_root")
     ) {
         // 1. Authentic Android 5.0 Wallpaper
-        LollipopWallpaper(preset = config.wallpaperPreset)
+        LollipopWallpaper(
+            preset = config.wallpaperPreset,
+            customUri = config.customWallpaperUri
+        )
 
         // 2. Desktop Home Layer with Swipe-Up gesture to open App Drawer
         Scaffold(
@@ -157,15 +165,17 @@ fun HomeScreen(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Android 5.0 Google Quick Search Bar
-                LollipopSearchBar(
-                    onSearchClick = {
-                        viewModel.openDrawer()
-                    },
-                    onVoiceClick = {
-                        AppManager.openWebSearch(context)
-                    }
-                )
+                // Android 5.0 Google Quick Search Bar (Toggleable in Settings, hidden by default)
+                if (config.showGoogleSearchBar) {
+                    LollipopSearchBar(
+                        onSearchClick = {
+                            viewModel.openDrawer()
+                        },
+                        onVoiceClick = {
+                            AppManager.openWebSearch(context)
+                        }
+                    )
+                }
 
                 // Hosted System Widgets from device
                 if (appWidgetHost != null && appWidgetManager != null && homeWidgets.isNotEmpty()) {
@@ -325,6 +335,7 @@ fun HomeScreen(
             onSettingsClick = {
                 viewModel.openSettings()
             },
+            favoriteApps = favoriteApps,
             iconPack = config.iconPack,
             drawerStyle = config.drawerStyle,
             columns = config.gridColumns,
@@ -391,8 +402,11 @@ fun HomeScreen(
                     viewModel.openWidgetPicker()
                 },
                 communityWallpapers = communityWallpapers,
-                onPublishWallpaper = { title, author, desc, preset ->
-                    viewModel.publishCommunityWallpaper(title, author, desc, preset)
+                onPublishWallpaper = { title, author, desc, preset, uri ->
+                    viewModel.publishCommunityWallpaper(title, author, desc, preset, uri)
+                },
+                onDeleteWallpaper = { id ->
+                    viewModel.deleteCommunityWallpaper(id)
                 },
                 onApplyWallpaper = { preset, uri ->
                     viewModel.applyWallpaper(preset, uri)

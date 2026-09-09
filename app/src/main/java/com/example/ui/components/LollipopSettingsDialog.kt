@@ -234,6 +234,13 @@ fun LollipopSettingsDialog(
                         onCheckedChange = { onConfigChange(config.copy(showAppLabels = it)) }
                     )
 
+                    SettingToggle(
+                        title = "Show Google Search Bar (شريط بحث Google)",
+                        subtitle = "Display Google quick search bar on home screen (Default: Hidden / مخفي)",
+                        checked = config.showGoogleSearchBar,
+                        onCheckedChange = { onConfigChange(config.copy(showGoogleSearchBar = it)) }
+                    )
+
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(

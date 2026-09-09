@@ -13,23 +13,31 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import com.example.R
 import com.example.model.WallpaperPreset
 
 /**
  * Renders authentic Android 5.0 Lollipop wallpapers, featuring geometric paper craft,
- * diagonal fold lines, transparent overlays, and rich Material 1.0 color planes.
+ * diagonal fold lines, transparent overlays, and rich Material 1.0 color planes,
+ * or custom photos chosen from the user's phone files.
  */
 @Composable
 fun LollipopWallpaper(
-    preset: WallpaperPreset,
+    preset: WallpaperPreset = WallpaperPreset.STOCK_LOLLIPOP,
+    customUri: String? = null,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        when (preset) {
-            WallpaperPreset.PURPLE_DEEP_BLUE -> {
-                DrawPurpleDeepBlueWallpaper()
-            }
+        if (!customUri.isNullOrBlank()) {
+            AsyncImage(
+                model = customUri,
+                contentDescription = "Custom User Wallpaper",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            when (preset) {
             WallpaperPreset.STOCK_LOLLIPOP -> {
                 Image(
                     painter = painterResource(id = R.drawable.bg_lollipop_default),
@@ -37,6 +45,24 @@ fun LollipopWallpaper(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
+            }
+            WallpaperPreset.PURPLE_DEEP_BLUE -> {
+                DrawPurpleDeepBlueWallpaper()
+            }
+            WallpaperPreset.MODERN_16_AURA -> {
+                DrawModern16AuraWallpaper()
+            }
+            WallpaperPreset.MODERN_16_FROSTED_GLASS -> {
+                DrawModern16FrostedGlassWallpaper()
+            }
+            WallpaperPreset.MODERN_17_CYBER_SUNSET -> {
+                DrawModern17CyberSunsetWallpaper()
+            }
+            WallpaperPreset.MODERN_17_COSMIC_NEBULA -> {
+                DrawModern17CosmicNebulaWallpaper()
+            }
+            WallpaperPreset.MODERN_17_MINIMAL_CHROMA -> {
+                DrawModern17MinimalChromaWallpaper()
             }
             WallpaperPreset.CYAN_GEOMETRIC -> {
                 DrawGeometricWallpaper(
@@ -71,6 +97,7 @@ fun LollipopWallpaper(
                 )
             }
         }
+    }
     }
 }
 
@@ -262,5 +289,261 @@ private fun DrawGeometricWallpaper(
             close()
         }
         drawPath(accentShadow, Color(0x22000000))
+    }
+}
+
+/**
+ * 1. Android 16: Luminous Aura Flow.
+ * Soft organic glowing radiant spheres on a deep titanium canvas.
+ */
+@Composable
+private fun DrawModern16AuraWallpaper() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        // Deep obsidian navy base
+        drawRect(color = Color(0xFF0C101A))
+
+        // Ambient radial aura 1 (Emerald/Teal top-right)
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFF10B981).copy(alpha = 0.40f), Color(0xFF064E3B).copy(alpha = 0.12f), Color.Transparent),
+                center = Offset(w * 0.85f, h * 0.18f),
+                radius = w * 0.75f
+            ),
+            radius = w * 0.75f,
+            center = Offset(w * 0.85f, h * 0.18f)
+        )
+
+        // Ambient radial aura 2 (Lavender violet center-left)
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFF8B5CF6).copy(alpha = 0.45f), Color(0xFF4C1D95).copy(alpha = 0.15f), Color.Transparent),
+                center = Offset(w * 0.15f, h * 0.52f),
+                radius = w * 0.85f
+            ),
+            radius = w * 0.85f,
+            center = Offset(w * 0.15f, h * 0.52f)
+        )
+
+        // Ambient radial aura 3 (Cyan/Indigo bottom-right)
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFF06B6D4).copy(alpha = 0.35f), Color.Transparent),
+                center = Offset(w * 0.70f, h * 0.82f),
+                radius = w * 0.65f
+            ),
+            radius = w * 0.65f,
+            center = Offset(w * 0.70f, h * 0.82f)
+        )
+    }
+}
+
+/**
+ * 2. Android 16: Frosted Glass Layers.
+ * Flowing curved translucent ribbons with subtle frosted sheen.
+ */
+@Composable
+private fun DrawModern16FrostedGlassWallpaper() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        // Deep cool graphite background
+        drawRect(
+            brush = Brush.verticalGradient(
+                listOf(Color(0xFF111827), Color(0xFF0F172A))
+            )
+        )
+
+        // Layer 1: Bottom subtle curve
+        val ribbon1 = Path().apply {
+            moveTo(0f, h * 0.38f)
+            cubicTo(w * 0.3f, h * 0.28f, w * 0.7f, h * 0.48f, w, h * 0.36f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(
+            path = ribbon1,
+            brush = Brush.linearGradient(
+                listOf(Color(0x3538BDF8), Color(0x180284C7))
+            )
+        )
+
+        // Frosted glass edge highlight
+        val highlight1 = Path().apply {
+            moveTo(0f, h * 0.38f)
+            cubicTo(w * 0.3f, h * 0.28f, w * 0.7f, h * 0.48f, w, h * 0.36f)
+        }
+        drawPath(
+            path = highlight1,
+            color = Color(0x40FFFFFF),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f)
+        )
+
+        // Layer 2: Middle floating glass veil
+        val ribbon2 = Path().apply {
+            moveTo(0f, h * 0.60f)
+            cubicTo(w * 0.35f, h * 0.72f, w * 0.65f, h * 0.52f, w, h * 0.64f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(
+            path = ribbon2,
+            brush = Brush.linearGradient(
+                listOf(Color(0x40818CF8), Color(0x224F46E5))
+            )
+        )
+
+        val highlight2 = Path().apply {
+            moveTo(0f, h * 0.60f)
+            cubicTo(w * 0.35f, h * 0.72f, w * 0.65f, h * 0.52f, w, h * 0.64f)
+        }
+        drawPath(
+            path = highlight2,
+            color = Color(0x35FFFFFF),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
+        )
+    }
+}
+
+/**
+ * 3. Android 17: Cyber Sunset Twilight.
+ * Radiant sunset transition with warm coral and midnight violet horizon.
+ */
+@Composable
+private fun DrawModern17CyberSunsetWallpaper() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        // Rich twilight sky gradient
+        drawRect(
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFF0F081D), // Midnight Abyss
+                    Color(0xFF2E1065), // Deep Violet
+                    Color(0xFF581C87), // Rich Purple
+                    Color(0xFF9333EA), // Radiant Violet
+                    Color(0xFFF43F5E), // Coral Neon
+                    Color(0xFFFB923C)  // Peach Sunrise
+                )
+            )
+        )
+
+        // Soft solar horizon glow
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0x99FFEDD5), Color(0x40FB923C), Color.Transparent),
+                center = Offset(w * 0.5f, h * 0.88f),
+                radius = w * 0.65f
+            ),
+            radius = w * 0.65f,
+            center = Offset(w * 0.5f, h * 0.88f)
+        )
+    }
+}
+
+/**
+ * 4. Android 17: Cosmic Nebula 3D Glow.
+ * Floating celestial orb fields with smooth, deep volumetric luminescence.
+ */
+@Composable
+private fun DrawModern17CosmicNebulaWallpaper() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        // Deep cosmos space black
+        drawRect(color = Color(0xFF070913))
+
+        // Magenta Nebula orb
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFFD946EF).copy(alpha = 0.50f), Color(0xFF86198F).copy(alpha = 0.18f), Color.Transparent),
+                center = Offset(w * 0.25f, h * 0.28f),
+                radius = w * 0.70f
+            ),
+            radius = w * 0.70f,
+            center = Offset(w * 0.25f, h * 0.28f)
+        )
+
+        // Cyan Nebula orb
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFF06B6D4).copy(alpha = 0.45f), Color(0xFF0E7490).copy(alpha = 0.15f), Color.Transparent),
+                center = Offset(w * 0.80f, h * 0.65f),
+                radius = w * 0.75f
+            ),
+            radius = w * 0.75f,
+            center = Offset(w * 0.80f, h * 0.65f)
+        )
+
+        // Indigo base light
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0xFF6366F1).copy(alpha = 0.35f), Color.Transparent),
+                center = Offset(w * 0.45f, h * 0.90f),
+                radius = w * 0.60f
+            ),
+            radius = w * 0.60f,
+            center = Offset(w * 0.45f, h * 0.90f)
+        )
+    }
+}
+
+/**
+ * 5. Android 17: Minimal Chroma Sculptural.
+ * Modern industrial micro-curves with elegant chromatic ambient light.
+ */
+@Composable
+private fun DrawModern17MinimalChromaWallpaper() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        // Pure dark titanium base
+        drawRect(color = Color(0xFF111418))
+
+        // Sculptural Chroma Curve
+        val chromaPath = Path().apply {
+            moveTo(0f, h * 0.78f)
+            cubicTo(w * 0.4f, h * 0.85f, w * 0.65f, h * 0.45f, w, h * 0.50f)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+
+        drawPath(
+            path = chromaPath,
+            brush = Brush.linearGradient(
+                colors = listOf(
+                    Color(0xFF1E293B),
+                    Color(0xFF0F172A)
+                ),
+                start = Offset(0f, h * 0.78f),
+                end = Offset(w, h)
+            )
+        )
+
+        // Glowing chromatic edge line
+        val edgePath = Path().apply {
+            moveTo(0f, h * 0.78f)
+            cubicTo(w * 0.4f, h * 0.85f, w * 0.65f, h * 0.45f, w, h * 0.50f)
+        }
+
+        drawPath(
+            path = edgePath,
+            brush = Brush.horizontalGradient(
+                colors = listOf(
+                    Color(0xFF3B82F6), // Electric Blue
+                    Color(0xFF10B981)  // Emerald Chroma
+                )
+            ),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3.5f)
+        )
     }
 }

@@ -29,11 +29,16 @@ data class HomeShortcut(
 )
 
 /**
- * Wallpaper style presets inspired by Android 5.0 Lollipop.
+ * Wallpaper style presets: classic Android 5.0 Lollipop and modern Android 16/17 inspired aesthetics.
  */
 enum class WallpaperPreset(val title: String) {
-    PURPLE_DEEP_BLUE("Material Purple & Deep Blue (أندرويد 5 بنفسجي وأزرق غامق - افتراضي)"),
-    STOCK_LOLLIPOP("Lollipop Original Paper"),
+    STOCK_LOLLIPOP("القديمة (الأصلية): أندرويد 5.0 الرسمية (Nexus 5 Paper)"),
+    PURPLE_DEEP_BLUE("أندرويد 5: بنفسجي وأزرق غامق (Material Purple & Blue)"),
+    MODERN_16_AURA("أندرويد 16: هالة ضوئية متدرجة (Luminous Aura)"),
+    MODERN_16_FROSTED_GLASS("أندرويد 16: طبقات زجاجية متداخلة (Frosted Glass Layers)"),
+    MODERN_17_CYBER_SUNSET("أندرويد 17: شفق الغروب الدافئ (Twilight Sunset)"),
+    MODERN_17_COSMIC_NEBULA("أندرويد 17: سديم كوني عائم (Cosmic Glow)"),
+    MODERN_17_MINIMAL_CHROMA("أندرويد 17: انحناءات ميكرو كروما (Minimal Chroma)"),
     CYAN_GEOMETRIC("Material Cyan Origami"),
     INDIGO_SUNSET("Material Indigo Night"),
     AMBER_SUNRISE("Material Amber Sunrise"),
@@ -58,12 +63,12 @@ enum class IconPackStyle(val title: String) {
 data class CommunityWallpaper(
     val id: String,
     val title: String,
-    val author: String = "مستخدم اللانشر",
-    val description: String,
+    val author: String = "أنا",
+    val description: String = "",
     val imageUri: String? = null,
     val preset: WallpaperPreset? = null,
     val colorHex: Long = 0xFF009688,
-    val likesCount: Int = 24,
+    val likesCount: Int = 0,
     val timestamp: Long = System.currentTimeMillis()
 )
 
@@ -71,10 +76,11 @@ data class CommunityWallpaper(
  * Drawer background transparency styles.
  */
 enum class DrawerStyle(val title: String, val alpha: Float) {
+    CLASSIC_SOLID("Classic Solid White (أبيض صافي كلاسيكي أندرويد 5 - الافتراضي)", 1.0f),
+    FROSTED_BLUR("Frosted Blur Glass (تشويش زجاجي يموّه ما خلفه)", 0.65f),
     TRANSLUCENT_GLASS("Translucent Glass (زجاجي شفاف يظهر الخلفية)", 0.72f),
     SEMI_TRANSPARENT("Semi-Transparent Dark (داكن شبه شفاف)", 0.50f),
-    CRYSTAL_CLEAR("Crystal Clear (شفاف بالكامل)", 0.22f),
-    CLASSIC_SOLID("Classic Solid Card (أبيض كلاسيكي)", 1.0f)
+    CRYSTAL_CLEAR("Crystal Clear (شفاف بالكامل)", 0.22f)
 }
 
 /**
@@ -97,15 +103,17 @@ data class LauncherConfig(
     val iconSizeDp: Int = 56,
     val showAppLabels: Boolean = true,
     val showClockWidget: Boolean = false,
+    val showGoogleSearchBar: Boolean = false, // Google search bar is hidden by default as requested!
     val wallpaperPreset: WallpaperPreset = WallpaperPreset.STOCK_LOLLIPOP,
     val customWallpaperUri: String? = null,
-    val iconPack: IconPackStyle = IconPackStyle.SYSTEM_FREEFORM,
-    val drawerStyle: DrawerStyle = DrawerStyle.TRANSLUCENT_GLASS,
+    val iconPack: IconPackStyle = IconPackStyle.ANDROID_5_ROUND,
+    val drawerStyle: DrawerStyle = DrawerStyle.CLASSIC_SOLID,
     val performanceMode: Boolean = false,
     val nostalgiaMode: Boolean = true,
     val animationsEnabled: Boolean = true,
     val soundEffectsEnabled: Boolean = true,
     val touchRippleEnabled: Boolean = true,
+    val waterSoundVolume: Float = 0.6f,
     val pageCount: Int = 2,
     val firstRunCompleted: Boolean = false
 )

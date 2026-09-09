@@ -33,31 +33,36 @@ class LauncherPreferencesRepository(context: Context) {
         val raw = prefs.getString(KEY_CONFIG, null) ?: return LauncherConfig()
         return try {
             val json = JSONObject(raw)
+            val customUri = if (json.has("customWallpaperUri")) json.optString("customWallpaperUri", null) else null
             LauncherConfig(
                 gridColumns = json.optInt("gridColumns", 4),
                 gridRows = json.optInt("gridRows", 5),
                 iconSizeDp = json.optInt("iconSizeDp", 56),
                 showAppLabels = json.optBoolean("showAppLabels", true),
+                showClockWidget = json.optBoolean("showClockWidget", false),
+                showGoogleSearchBar = json.optBoolean("showGoogleSearchBar", false), // Default: false (hidden)
                 wallpaperPreset = try {
                     WallpaperPreset.valueOf(json.optString("wallpaperPreset", WallpaperPreset.STOCK_LOLLIPOP.name))
                 } catch (e: Exception) {
                     WallpaperPreset.STOCK_LOLLIPOP
                 },
+                customWallpaperUri = if (customUri.isNullOrBlank()) null else customUri,
                 iconPack = try {
                     IconPackStyle.valueOf(json.optString("iconPack", IconPackStyle.ANDROID_5_ROUND.name))
                 } catch (e: Exception) {
                     IconPackStyle.ANDROID_5_ROUND
                 },
                 drawerStyle = try {
-                    DrawerStyle.valueOf(json.optString("drawerStyle", DrawerStyle.TRANSLUCENT_GLASS.name))
+                    DrawerStyle.valueOf(json.optString("drawerStyle", DrawerStyle.CLASSIC_SOLID.name))
                 } catch (e: Exception) {
-                    DrawerStyle.TRANSLUCENT_GLASS
+                    DrawerStyle.CLASSIC_SOLID
                 },
                 performanceMode = json.optBoolean("performanceMode", false),
                 nostalgiaMode = json.optBoolean("nostalgiaMode", true),
                 animationsEnabled = json.optBoolean("animationsEnabled", true),
                 soundEffectsEnabled = json.optBoolean("soundEffectsEnabled", true),
                 touchRippleEnabled = json.optBoolean("touchRippleEnabled", true),
+                waterSoundVolume = json.optDouble("waterSoundVolume", 0.6).toFloat(),
                 pageCount = json.optInt("pageCount", 2),
                 firstRunCompleted = prefs.getBoolean(KEY_FIRST_RUN, false)
             )
@@ -72,7 +77,10 @@ class LauncherPreferencesRepository(context: Context) {
             put("gridRows", config.gridRows)
             put("iconSizeDp", config.iconSizeDp)
             put("showAppLabels", config.showAppLabels)
+            put("showClockWidget", config.showClockWidget)
+            put("showGoogleSearchBar", config.showGoogleSearchBar)
             put("wallpaperPreset", config.wallpaperPreset.name)
+            if (config.customWallpaperUri != null) put("customWallpaperUri", config.customWallpaperUri)
             put("iconPack", config.iconPack.name)
             put("drawerStyle", config.drawerStyle.name)
             put("performanceMode", config.performanceMode)
@@ -80,6 +88,7 @@ class LauncherPreferencesRepository(context: Context) {
             put("animationsEnabled", config.animationsEnabled)
             put("soundEffectsEnabled", config.soundEffectsEnabled)
             put("touchRippleEnabled", config.touchRippleEnabled)
+            put("waterSoundVolume", config.waterSoundVolume.toDouble())
             put("pageCount", config.pageCount)
         }
         prefs.edit()
@@ -196,6 +205,54 @@ class LauncherPreferencesRepository(context: Context) {
             arr.put(item)
         }
         prefs.edit().putString(KEY_WIDGETS, arr.toString()).apply()
+    }
+
+    fun loadCommunityWallpapers(): List<com.example.model.CommunityWallpaper> {
+        val raw = prefs.getString("community_wallpapers_json", null) ?: return emptyList()
+        val list = mutableListOf<com.example.model.CommunityWallpaper>()
+        try {
+            val arr = JSONArray(raw)
+            for (i in 0 until arr.length()) {
+                val item = arr.getJSONObject(i)
+                val presetStr = item.optString("preset", "")
+                val preset = if (presetStr.isNotEmpty()) {
+                    try { WallpaperPreset.valueOf(presetStr) } catch (e: Exception) { null }
+                } else null
+                list.add(
+                    com.example.model.CommunityWallpaper(
+                        id = item.optString("id", "comm_$i"),
+                        title = item.optString("title", "خلفية مخصصة"),
+                        author = item.optString("author", "أنا"),
+                        description = item.optString("description", ""),
+                        imageUri = item.optString("imageUri", null),
+                        preset = preset,
+                        colorHex = item.optLong("colorHex", 0xFF009688),
+                        likesCount = item.optInt("likesCount", 0),
+                        timestamp = item.optLong("timestamp", System.currentTimeMillis())
+                    )
+                )
+            }
+        } catch (ignored: Exception) {}
+        return list
+    }
+
+    fun saveCommunityWallpapers(wallpapers: List<com.example.model.CommunityWallpaper>) {
+        val arr = JSONArray()
+        for (w in wallpapers) {
+            val item = JSONObject().apply {
+                put("id", w.id)
+                put("title", w.title)
+                put("author", w.author)
+                put("description", w.description)
+                if (w.imageUri != null) put("imageUri", w.imageUri)
+                if (w.preset != null) put("preset", w.preset.name)
+                put("colorHex", w.colorHex)
+                put("likesCount", w.likesCount)
+                put("timestamp", w.timestamp)
+            }
+            arr.put(item)
+        }
+        prefs.edit().putString("community_wallpapers_json", arr.toString()).apply()
     }
 
     /**

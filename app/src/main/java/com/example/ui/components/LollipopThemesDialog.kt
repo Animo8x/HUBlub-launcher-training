@@ -1,5 +1,13 @@
 package com.example.ui.components
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,6 +33,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FormatPaint
@@ -86,16 +95,17 @@ fun LollipopThemesDialog(
     onConfigChange: (LauncherConfig) -> Unit,
     onOpenWidgetPicker: () -> Unit,
     communityWallpapers: List<CommunityWallpaper> = emptyList(),
-    onPublishWallpaper: (String, String, String, WallpaperPreset?) -> Unit = { _, _, _, _ -> },
+    onPublishWallpaper: (String, String, String, WallpaperPreset?, String?) -> Unit = { _, _, _, _, _ -> },
+    onDeleteWallpaper: (String) -> Unit = {},
     onApplyWallpaper: (WallpaperPreset?, String?) -> Unit = { _, _ -> },
     onClose: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf(
         "خلفيات الشاشة (Wallpapers)",
-        "خلفيات المجتمع (Community)",
+        "خلفيات من جهازي (My Wallpapers)",
         "حزم الأيقونات (5 Packs)",
-        "الشفافية (Transparency)",
+        "مظهر الدرج والشفافية (Drawer Style)",
         "الودجات (Widgets)"
     )
 
@@ -221,11 +231,15 @@ fun LollipopThemesDialog(
                                 onConfigChange(config.copy(wallpaperPreset = preset, customWallpaperUri = null))
                             }
                         )
-                        1 -> CommunityWallpapersSection(
+                        1 -> MyWallpapersSection(
                             communityWallpapers = communityWallpapers,
                             currentPreset = config.wallpaperPreset,
-                            onPublish = { title, author, desc, preset ->
-                                onPublishWallpaper(title, author, desc, preset)
+                            currentCustomUri = config.customWallpaperUri,
+                            onPublish = { title, uri ->
+                                onPublishWallpaper(title, "", "", null, uri)
+                            },
+                            onDelete = { id ->
+                                onDeleteWallpaper(id)
                             },
                             onApply = { preset, uri ->
                                 LollipopSoundEffects.playButtonClick()
@@ -293,6 +307,31 @@ private fun WallpapersSection(
             WallpaperPreset.DARK_SLATE,
             "الوضع الليلي (Dark Slate Minimal)",
             "خلفية داكنة موفرة للطاقة تبرز بطاقات وأيقونات التطبيقات الملونة."
+        ),
+        Triple(
+            WallpaperPreset.MODERN_16_AURA,
+            "أندرويد 16: هالة ضوئية متدرجة (Luminous Aura)",
+            "تدرجات أثيرية متوهجة مستوحاة من أحدث لغات التصميم لمستقبل أندرويد."
+        ),
+        Triple(
+            WallpaperPreset.MODERN_16_FROSTED_GLASS,
+            "أندرويد 16: طبقات زجاجية متداخلة (Frosted Glass)",
+            "تأثير زجاجي مصقول مع انكسارات ضوئية ناعمة وظلال خفيفة راقية."
+        ),
+        Triple(
+            WallpaperPreset.MODERN_17_CYBER_SUNSET,
+            "أندرويد 17: شفق الغروب الدافئ (Twilight Sunset)",
+            "تدرجات لونية هادئة تمزج الشفق الكوني الدافئ لراحة العين والوضوح الفائق."
+        ),
+        Triple(
+            WallpaperPreset.MODERN_17_COSMIC_NEBULA,
+            "أندرويد 17: سديم كوني عائم (Cosmic Glow)",
+            "دوائر وتوهجات نيبولا عائمة تمنح إحساساً بالعمق والفضاء الفسيح والشياكة."
+        ),
+        Triple(
+            WallpaperPreset.MODERN_17_MINIMAL_CHROMA,
+            "أندرويد 17: انحناءات ميكرو كروما (Minimal Chroma)",
+            "تصميم نقي وبسيط مع خطوط انحناء حيوية تتناغم مع أيقونات الشاشة."
         )
     )
 
@@ -405,28 +444,52 @@ private fun WallpapersSection(
 }
 
 /**
- * Community Wallpapers Tab:
- * Publish, share, and discover custom user wallpapers with names, descriptions, and authors.
+ * My Wallpapers Tab (خلفيات من جهازي):
+ * Pick genuine images from device files (Photo Picker), preview them, save them with name & description,
+ * apply them directly, or delete them from the local list.
+ * Zero fake likes, zero fake users.
  */
 @Composable
-private fun CommunityWallpapersSection(
+private fun MyWallpapersSection(
     communityWallpapers: List<CommunityWallpaper>,
     currentPreset: WallpaperPreset,
-    onPublish: (String, String, String, WallpaperPreset?) -> Unit,
+    currentCustomUri: String?,
+    onPublish: (String, String) -> Unit,
+    onDelete: (String) -> Unit,
     onApply: (WallpaperPreset?, String?) -> Unit
 ) {
-    var showPublishDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var showSaveDialog by remember { mutableStateOf(false) }
+    var selectedImageUri by remember { mutableStateOf<String?>(null) }
     var titleInput by remember { mutableStateOf("") }
-    var authorInput by remember { mutableStateOf("") }
     var descInput by remember { mutableStateOf("") }
-    var selectedPreset by remember { mutableStateOf(WallpaperPreset.PURPLE_DEEP_BLUE) }
 
-    if (showPublishDialog) {
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: Exception) {
+                // Some providers might not support persistable URIs
+            }
+            selectedImageUri = uri.toString()
+            titleInput = "خلفية مخصصة ${communityWallpapers.size + 1}"
+            descInput = "صورة من ذاكرة الهاتف"
+            showSaveDialog = true
+        }
+    }
+
+    if (showSaveDialog && selectedImageUri != null) {
+        val uriStr = selectedImageUri!!
         AlertDialog(
-            onDismissRequest = { showPublishDialog = false },
+            onDismissRequest = { showSaveDialog = false },
             title = {
                 Text(
-                    text = "نشر خلفية جديدة للمجتمع",
+                    text = "حفظ وتطبيق الخلفية من ملفاتك",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
@@ -436,11 +499,19 @@ private fun CommunityWallpapersSection(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Text(
-                        text = "شارك خلفيتك المفضلة مع اسمك ووصف مخصص لكي يتمكن الجميع من تحميلها وتطبيقها على هواتفهم.",
-                        fontSize = 12.sp,
-                        color = Color(0xFF546E7A)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    ) {
+                        AsyncImage(
+                            model = uriStr,
+                            contentDescription = "معاينة الخلفية",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
 
                     OutlinedTextField(
                         value = titleInput,
@@ -451,72 +522,41 @@ private fun CommunityWallpapersSection(
                     )
 
                     OutlinedTextField(
-                        value = authorInput,
-                        onValueChange = { authorInput = it },
-                        label = { Text("اسمك / الناشر (Author)") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
                         value = descInput,
                         onValueChange = { descInput = it },
-                        label = { Text("وصف الخلفية (Description)") },
-                        maxLines = 3,
+                        label = { Text("الوصف (اختياري)") },
+                        maxLines = 2,
                         modifier = Modifier.fillMaxWidth()
                     )
-
-                    Text(
-                        text = "اختر نمط الألوان والتصميم:",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        WallpaperPreset.values().take(4).forEach { preset ->
-                            Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = if (selectedPreset == preset) LollipopTeal500 else Color(0xFFCFD8DC),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(36.dp)
-                                    .clickable { selectedPreset = preset }
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        text = preset.name.take(4),
-                                        fontSize = 10.sp,
-                                        color = if (selectedPreset == preset) Color.White else Color(0xFF37474F),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
-                    }
                 }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        if (titleInput.isNotBlank()) {
-                            onPublish(titleInput, authorInput, descInput, selectedPreset)
-                            showPublishDialog = false
-                            titleInput = ""
-                            authorInput = ""
-                            descInput = ""
-                        }
+                        val title = titleInput.ifBlank { "خلفية من جهازي" }
+                        onPublish(title, uriStr)
+                        onApply(null, uriStr)
+                        showSaveDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = LollipopTeal500)
                 ) {
-                    Text("نشر الآن (Publish)")
+                    Text("حفظ وتطبيق الآن")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showPublishDialog = false }) {
-                    Text("إلغاء")
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    OutlinedButton(
+                        onClick = {
+                            val title = titleInput.ifBlank { "خلفية من جهازي" }
+                            onPublish(title, uriStr)
+                            showSaveDialog = false
+                        }
+                    ) {
+                        Text("حفظ فقط")
+                    }
+                    TextButton(onClick = { showSaveDialog = false }) {
+                        Text("إلغاء")
+                    }
                 }
             }
         )
@@ -527,10 +567,10 @@ private fun CommunityWallpapersSection(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Share / Upload Banner
+        // Button to pick image from device
         item {
             Card(
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = LollipopTeal700),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -543,37 +583,41 @@ private fun CommunityWallpapersSection(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "شارك إبداعك مع مجتمع اللانشر",
+                            text = "اختيار صورة كخلفية من ملفات الجهاز",
                             color = Color.White,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(3.dp))
                         Text(
-                            text = "انشر خلفيتك بالاسم والوصف ليراها ويستخدمها الجميع",
+                            text = "اختر صورة حقيقية من معرض الصور، عاينها، واحفظها في قائمتك",
                             color = Color(0xDDFFFFFF),
                             fontSize = 12.sp
                         )
                     }
 
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     Button(
                         onClick = {
                             LollipopSoundEffects.playButtonClick()
-                            showPublishDialog = true
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = LollipopAmber500),
-                        shape = RoundedCornerShape(4.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = null,
                             tint = Color(0xFF212121),
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "نشر خلفية",
+                            text = "اختيار صورة",
                             color = Color(0xFF212121),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
@@ -583,105 +627,158 @@ private fun CommunityWallpapersSection(
             }
         }
 
-        items(communityWallpapers) { item ->
-            val isCurrent = item.preset != null && item.preset == currentPreset
-
-            Card(
-                shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialCardWhite),
-                elevation = CardDefaults.cardElevation(2.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // Preview
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(110.dp)
-                            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                    ) {
-                        if (item.preset != null) {
-                            LollipopWallpaper(preset = item.preset)
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color(item.colorHex))
-                            )
-                        }
-
-                        // Author Badge
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0xCC000000),
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = "بواسطة: ${item.author}",
-                                color = Color.White,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                            )
-                        }
+        if (communityWallpapers.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = null,
+                            tint = Color(0xFF90A4AE),
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "لم تقم بإضافة أي خلفية مخصصة بعد.",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF455A64)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "اضغط على زر \"اختيار صورة\" أعلاه لاختيار صورة من هاتفك وتطبيقها.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF78909C)
+                        )
                     }
+                }
+            }
+        } else {
+            items(communityWallpapers) { item ->
+                val isCurrent = (item.imageUri != null && item.imageUri == currentCustomUri) ||
+                        (item.imageUri == null && item.preset != null && item.preset == currentPreset)
 
-                    // Content & Apply
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = item.title,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF263238)
-                            )
-                            Spacer(modifier = Modifier.height(3.dp))
-                            Text(
-                                text = item.description,
-                                fontSize = 12.sp,
-                                color = Color(0xFF78909C),
-                                lineHeight = 16.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.Favorite,
-                                    contentDescription = null,
-                                    tint = Color(0xFFE91E63),
-                                    modifier = Modifier.size(14.dp)
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialCardWhite),
+                    elevation = CardDefaults.cardElevation(if (isCurrent) 4.dp else 1.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = if (isCurrent) 2.dp else 0.dp,
+                            color = if (isCurrent) LollipopTeal500 else Color.Transparent,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(140.dp)
+                                .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                        ) {
+                            if (item.imageUri != null) {
+                                AsyncImage(
+                                    model = item.imageUri,
+                                    contentDescription = item.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "${item.likesCount} إعجاب",
-                                    fontSize = 11.sp,
-                                    color = Color(0xFF90A4AE)
+                            } else if (item.preset != null) {
+                                LollipopWallpaper(preset = item.preset)
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color(item.colorHex))
                                 )
+                            }
+
+                            if (isCurrent) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = LollipopTeal500,
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = "الخلفية الحالية ✓",
+                                        color = Color.White,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        Button(
-                            onClick = { onApply(item.preset, item.imageUri) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isCurrent) LollipopTeal700 else LollipopTeal500
-                            ),
-                            shape = RoundedCornerShape(4.dp),
-                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                text = if (isCurrent) "مطبقة ✓" else "تطبيق",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = item.title,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF263238)
+                                )
+                                if (item.description.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = item.description,
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF78909C),
+                                        maxLines = 2
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(
+                                    onClick = {
+                                        LollipopSoundEffects.playSoftPop()
+                                        onDelete(item.id)
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "حذف الخلفية",
+                                        tint = Color(0xFFE53935)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                Button(
+                                    onClick = {
+                                        LollipopSoundEffects.playButtonClick()
+                                        onApply(item.preset, item.imageUri)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isCurrent) LollipopTeal700 else LollipopTeal500
+                                    ),
+                                    shape = RoundedCornerShape(6.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Text(
+                                        text = if (isCurrent) "مطبقة ✓" else "تطبيق",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
                     }
                 }

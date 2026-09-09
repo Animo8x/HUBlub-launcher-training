@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -233,61 +234,152 @@ fun LollipopAppIconView(
     iconPack: IconPackStyle = IconPackStyle.SYSTEM_FREEFORM,
     size: Dp = 56.dp
 ) {
-    // 1. Built-in dedicated Themes App
-    if (packageName == "com.example.themes" || label == "Themes" || label == "الثيمات (Themes)" || label == "الثيمات") {
-        Surface(
-            shape = CircleShape,
-            color = Color(0xFF009688), // Lollipop Teal
-            shadowElevation = 3.dp,
-            modifier = modifier
-                .size(size)
-                .clip(CircleShape)
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PhotoLibrary,
-                    contentDescription = label,
-                    tint = Color(0xFFFFEB3B), // Amber accent
-                    modifier = Modifier.size(size * 0.58f)
-                )
+    val isThemesApp = packageName == "com.example.themes" || label == "Themes" || label.contains("الثيمات")
+    val isSettingsApp = packageName == "com.example.launcher.settings" || label.contains("إعدادات اللانشر") || label == "HUBlub Settings"
+
+    // 1. Built-in Themes App dynamically morphs into selected Icon Pack
+    if (isThemesApp) {
+        when (iconPack) {
+            IconPackStyle.ANDROID_5_ROUND -> {
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFF009688), // Lollipop Teal
+                    shadowElevation = 3.dp,
+                    modifier = modifier.size(size).clip(CircleShape)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.PhotoLibrary, contentDescription = label, tint = Color(0xFFFFEB3B), modifier = Modifier.size(size * 0.58f))
+                    }
+                }
+            }
+            IconPackStyle.MATERIAL_YOU_SQUIRCLE -> {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFFFFD8E4), // Pastel Rose
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(16.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.PhotoLibrary, contentDescription = label, tint = Color(0xFF633B48), modifier = Modifier.size(size * 0.56f))
+                    }
+                }
+            }
+            IconPackStyle.IOS_MINIMAL_FLAT -> {
+                Surface(
+                    shape = RoundedCornerShape(13.dp),
+                    color = Color.Transparent,
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(13.dp))
+                        .background(Brush.linearGradient(listOf(Color(0xFF8E24AA), Color(0xFFE91E63))))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.PhotoLibrary, contentDescription = label, tint = Color.White, modifier = Modifier.size(size * 0.56f))
+                    }
+                }
+            }
+            IconPackStyle.KITKAT_VINTAGE_RETRO -> {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = Color(0xFF1E272C),
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(4.dp))
+                        .border(1.dp, Color(0xFF33B5E5), RoundedCornerShape(4.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.PhotoLibrary, contentDescription = label, tint = Color(0xFF33B5E5), modifier = Modifier.size(size * 0.56f))
+                    }
+                }
+            }
+            IconPackStyle.SYSTEM_FREEFORM -> {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFF009688),
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(12.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.PhotoLibrary, contentDescription = label, tint = Color(0xFFFFEB3B), modifier = Modifier.size(size * 0.56f))
+                    }
+                }
             }
         }
         return
     }
 
-    // 2. Built-in dedicated Settings App
-    if (packageName == "com.example.launcher.settings" || label.contains("إعدادات اللانشر") || label == "HUBlub Settings") {
-        Surface(
-            shape = RoundedCornerShape(14.dp),
-            color = Color(0xFF3F51B5), // Lollipop Indigo 500
-            shadowElevation = 3.dp,
-            modifier = modifier
-                .size(size)
-                .clip(RoundedCornerShape(14.dp))
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Tune,
-                    contentDescription = label,
-                    tint = Color(0xFFFFD54F), // Warm gold
-                    modifier = Modifier.size(size * 0.58f)
-                )
+    // 2. Built-in Settings App dynamically morphs into selected Icon Pack
+    if (isSettingsApp) {
+        when (iconPack) {
+            IconPackStyle.ANDROID_5_ROUND -> {
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFF3F51B5), // Lollipop Indigo 500
+                    shadowElevation = 3.dp,
+                    modifier = modifier.size(size).clip(CircleShape)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.Tune, contentDescription = label, tint = Color(0xFFFFD54F), modifier = Modifier.size(size * 0.58f))
+                    }
+                }
+            }
+            IconPackStyle.MATERIAL_YOU_SQUIRCLE -> {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFFD0E8D7), // Pastel Mint
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(16.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.Settings, contentDescription = label, tint = Color(0xFF1B3728), modifier = Modifier.size(size * 0.56f))
+                    }
+                }
+            }
+            IconPackStyle.IOS_MINIMAL_FLAT -> {
+                Surface(
+                    shape = RoundedCornerShape(13.dp),
+                    color = Color(0xFF8E8E93), // iOS Titanium Silver
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(13.dp))
+                        .border(0.5.dp, Color(0x33000000), RoundedCornerShape(13.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.Settings, contentDescription = label, tint = Color.White, modifier = Modifier.size(size * 0.58f))
+                    }
+                }
+            }
+            IconPackStyle.KITKAT_VINTAGE_RETRO -> {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = Color(0xFF1E272C),
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(4.dp))
+                        .border(1.dp, Color(0xFF33B5E5), RoundedCornerShape(4.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.Settings, contentDescription = label, tint = Color(0xFF33B5E5), modifier = Modifier.size(size * 0.56f))
+                    }
+                }
+            }
+            IconPackStyle.SYSTEM_FREEFORM -> {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFF3F51B5),
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(12.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = Icons.Default.Tune, contentDescription = label, tint = Color(0xFFFFD54F), modifier = Modifier.size(size * 0.56f))
+                    }
+                }
             }
         }
         return
     }
+
+    val canonicalDef = LollipopIconPack.resolveCanonicalIcon(packageName, label)
 
     // 3. Render icon according to chosen IconPackStyle
     when (iconPack) {
         IconPackStyle.SYSTEM_FREEFORM -> {
-            // Freeform Natural: Render the app icon in its true native shape (square, circle, adaptive, whatever it is)
-            // NO forced white circular plate behind square apps!
             if (systemIcon != null) {
                 Image(
                     bitmap = systemIcon,
@@ -297,34 +389,49 @@ fun LollipopAppIconView(
                         .size(size)
                         .padding(1.dp)
                 )
+            } else if (canonicalDef != null) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = canonicalDef.backgroundColor,
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(12.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = canonicalDef.iconVector, contentDescription = label, tint = canonicalDef.iconTint, modifier = Modifier.size(size * 0.54f))
+                    }
+                }
             } else {
                 RenderFallbackLetter(label, size, modifier, shape = RoundedCornerShape(12.dp))
             }
         }
 
         IconPackStyle.MATERIAL_YOU_SQUIRCLE -> {
-            // Modern Android / OneUI Squircle Style
-            if (systemIcon != null) {
+            // Distinct Material You shapes, glyphs and pastels
+            if (canonicalDef != null) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = canonicalDef.backgroundColor.copy(alpha = 0.25f),
+                    shadowElevation = 1.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(16.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = canonicalDef.iconVector,
+                            contentDescription = label,
+                            tint = canonicalDef.backgroundColor,
+                            modifier = Modifier.size(size * 0.54f)
+                        )
+                    }
+                }
+            } else if (systemIcon != null) {
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = Color.White,
                     shadowElevation = 2.dp,
-                    modifier = modifier
-                        .size(size)
-                        .clip(RoundedCornerShape(16.dp))
+                    modifier = modifier.size(size).clip(RoundedCornerShape(16.dp))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(size * 0.10f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            bitmap = systemIcon,
-                            contentDescription = label,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    Box(modifier = Modifier.fillMaxSize().padding(size * 0.10f), contentAlignment = Alignment.Center) {
+                        Image(bitmap = systemIcon, contentDescription = label, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
                     }
                 }
             } else {
@@ -333,29 +440,34 @@ fun LollipopAppIconView(
         }
 
         IconPackStyle.IOS_MINIMAL_FLAT -> {
-            // iOS Minimal Glass Smooth Rounded Rect
-            if (systemIcon != null) {
+            // Distinct iOS gradients, smooth squircle, and pure white vector glyphs
+            if (canonicalDef != null) {
+                Surface(
+                    shape = RoundedCornerShape(13.dp),
+                    color = canonicalDef.backgroundColor,
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(13.dp))
+                        .border(0.5.dp, Color(0x1F000000), RoundedCornerShape(13.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = canonicalDef.iconVector,
+                            contentDescription = label,
+                            tint = Color.White,
+                            modifier = Modifier.size(size * 0.56f)
+                        )
+                    }
+                }
+            } else if (systemIcon != null) {
                 Surface(
                     shape = RoundedCornerShape(13.dp),
                     color = Color(0xFFF7F9FA),
                     shadowElevation = 1.5.dp,
-                    modifier = modifier
-                        .size(size)
-                        .clip(RoundedCornerShape(13.dp))
+                    modifier = modifier.size(size).clip(RoundedCornerShape(13.dp))
                         .border(0.5.dp, Color(0x22000000), RoundedCornerShape(13.dp))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(size * 0.08f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            bitmap = systemIcon,
-                            contentDescription = label,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    Box(modifier = Modifier.fillMaxSize().padding(size * 0.08f), contentAlignment = Alignment.Center) {
+                        Image(bitmap = systemIcon, contentDescription = label, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
                     }
                 }
             } else {
@@ -365,82 +477,57 @@ fun LollipopAppIconView(
 
         IconPackStyle.ANDROID_5_ROUND -> {
             // Classic Android 5.0 Lollipop Circular Paper Container
-            if (systemIcon != null) {
+            if (canonicalDef != null) {
+                Surface(
+                    shape = CircleShape,
+                    color = canonicalDef.backgroundColor,
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(CircleShape)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = canonicalDef.iconVector, contentDescription = label, tint = canonicalDef.iconTint, modifier = Modifier.size(size * 0.54f))
+                    }
+                }
+            } else if (systemIcon != null) {
                 Surface(
                     shape = CircleShape,
                     color = Color.White,
                     shadowElevation = 2.dp,
-                    modifier = modifier
-                        .size(size)
-                        .clip(CircleShape)
+                    modifier = modifier.size(size).clip(CircleShape)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(size * 0.12f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            bitmap = systemIcon,
-                            contentDescription = label,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    Box(modifier = Modifier.fillMaxSize().padding(size * 0.12f), contentAlignment = Alignment.Center) {
+                        Image(bitmap = systemIcon, contentDescription = label, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
                     }
                 }
             } else {
-                val canonicalDef = LollipopIconPack.resolveCanonicalIcon(packageName, label)
-                if (canonicalDef != null) {
-                    Surface(
-                        shape = CircleShape,
-                        color = canonicalDef.backgroundColor,
-                        shadowElevation = 2.dp,
-                        modifier = modifier
-                            .size(size)
-                            .clip(CircleShape)
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = canonicalDef.iconVector,
-                                contentDescription = label,
-                                tint = canonicalDef.iconTint,
-                                modifier = Modifier.size(size * 0.54f)
-                            )
-                        }
-                    }
-                } else {
-                    RenderFallbackLetter(label, size, modifier, shape = CircleShape)
-                }
+                RenderFallbackLetter(label, size, modifier, shape = CircleShape)
             }
         }
 
         IconPackStyle.KITKAT_VINTAGE_RETRO -> {
-            // Vintage Android 4.4 Holo / KitKat Style
-            if (systemIcon != null) {
+            // Vintage Android 4.4 Holo / KitKat Style with Holo Cyan accents
+            if (canonicalDef != null) {
                 Surface(
                     shape = RoundedCornerShape(4.dp),
                     color = Color(0xFF1E272C),
                     shadowElevation = 2.dp,
-                    modifier = modifier
-                        .size(size)
-                        .clip(RoundedCornerShape(4.dp))
+                    modifier = modifier.size(size).clip(RoundedCornerShape(4.dp))
+                        .border(1.dp, Color(0xFF33B5E5).copy(alpha = 0.7f), RoundedCornerShape(4.dp))
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(imageVector = canonicalDef.iconVector, contentDescription = label, tint = Color(0xFF33B5E5), modifier = Modifier.size(size * 0.54f))
+                    }
+                }
+            } else if (systemIcon != null) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = Color(0xFF1E272C),
+                    shadowElevation = 2.dp,
+                    modifier = modifier.size(size).clip(RoundedCornerShape(4.dp))
                         .border(1.dp, Color(0xFF33B5E5).copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(size * 0.10f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            bitmap = systemIcon,
-                            contentDescription = label,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    Box(modifier = Modifier.fillMaxSize().padding(size * 0.10f), contentAlignment = Alignment.Center) {
+                        Image(bitmap = systemIcon, contentDescription = label, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
                     }
                 }
             } else {

@@ -304,12 +304,23 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     fun addToDock(packageName: String) {
         val current = _dockPackages.value.toMutableList()
-        if (!current.contains(packageName) && current.size < 4) {
+        if (!current.contains(packageName)) {
+            if (current.size >= 5) {
+                current.removeAt(current.size - 1)
+            }
             current.add(packageName)
             _dockPackages.value = current
             repository.saveDockPackages(current)
         }
         closeAppMenu()
+    }
+
+    fun toggleDock(packageName: String) {
+        if (_dockPackages.value.contains(packageName)) {
+            removeFromDock(packageName)
+        } else {
+            addToDock(packageName)
+        }
     }
 
     fun removeFromDock(packageName: String) {
@@ -318,6 +329,53 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         _dockPackages.value = current
         repository.saveDockPackages(current)
         closeAppMenu()
+    }
+
+    fun addPage() {
+        val newCount = (_config.value.pageCount + 1).coerceAtMost(9)
+        updateConfig(_config.value.copy(pageCount = newCount))
+    }
+
+    fun removePage(pageIndex: Int) {
+        if (_config.value.pageCount <= 1) return
+        val updatedShortcuts = _homeShortcuts.value
+            .filter { it.pageIndex != pageIndex }
+            .map { if (it.pageIndex > pageIndex) it.copy(pageIndex = it.pageIndex - 1) else it }
+        _homeShortcuts.value = updatedShortcuts
+        repository.saveShortcuts(updatedShortcuts)
+        updateConfig(_config.value.copy(pageCount = _config.value.pageCount - 1))
+    }
+
+    fun addShortcutToHomeAt(app: AppInfo, page: Int, cellX: Int, cellY: Int) {
+        val current = _homeShortcuts.value.toMutableList()
+        val existingIndex = current.indexOfFirst { it.pageIndex == page && it.cellX == cellX && it.cellY == cellY }
+        if (existingIndex >= 0) {
+            current.removeAt(existingIndex)
+        }
+        val newShortcut = HomeShortcut(
+            id = "${app.packageName}_${System.currentTimeMillis()}",
+            packageName = app.packageName,
+            activityName = app.activityName,
+            label = app.label,
+            pageIndex = page,
+            cellX = cellX,
+            cellY = cellY
+        )
+        current.add(newShortcut)
+        _homeShortcuts.value = current
+        repository.saveShortcuts(current)
+    }
+
+    private val _draggedApp = MutableStateFlow<AppInfo?>(null)
+    val draggedApp: StateFlow<AppInfo?> = _draggedApp.asStateFlow()
+
+    fun startDraggingApp(app: AppInfo) {
+        _draggedApp.value = app
+        closeDrawer()
+    }
+
+    fun endDraggingApp() {
+        _draggedApp.value = null
     }
 
     fun updateConfig(newConfig: LauncherConfig) {
@@ -348,72 +406,33 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         return success
     }
 
-    // Community Wallpapers ("خلفيات المجتمع / مشاركة خلفيتك")
+    // Community Wallpapers (Local user photos from device files, without fake data)
     private val _communityWallpapers = MutableStateFlow<List<CommunityWallpaper>>(
-        listOf(
-            CommunityWallpaper(
-                id = "comm_1",
-                title = "أمواج ماتيريال بنفسجية وأزرق غامق",
-                author = "أحمد خالد",
-                description = "خلفية ناعمة مستوحاة من خطوط لوليبوب الكلاسيكية مع تدرجات هادئة ومريحة للعين.",
-                preset = WallpaperPreset.PURPLE_DEEP_BLUE,
-                colorHex = 0xFF4A148C,
-                likesCount = 68
-            ),
-            CommunityWallpaper(
-                id = "comm_2",
-                title = "أوريغامي سيان لوليبوب الورقي",
-                author = "سارة ديزاين",
-                description = "ورق مطوي هندسي بدقة عالية مع ألوان مبهجة تناسب كافة التطبيقات.",
-                preset = WallpaperPreset.CYAN_GEOMETRIC,
-                colorHex = 0xFF0097A7,
-                likesCount = 52
-            ),
-            CommunityWallpaper(
-                id = "comm_3",
-                title = "شمس العنبر الذهبية المشرقة",
-                author = "عمر التقني",
-                description = "تدرج شروق الشمس الكلاسيكي لأندرويد 5 مع لمسات ضوئية ساحرة.",
-                preset = WallpaperPreset.AMBER_SUNRISE,
-                colorHex = 0xFFFF6F00,
-                likesCount = 44
-            ),
-            CommunityWallpaper(
-                id = "comm_4",
-                title = "ورق لوليبوب الرسمي الكلاسيكي",
-                author = "مجتمع أندرويد العربي",
-                description = "خلفية جوجل الرسمية الأصلية لإطلاق أندرويد لوليبوب 2014 بجودتها الكاملة.",
-                preset = WallpaperPreset.STOCK_LOLLIPOP,
-                colorHex = 0xFF00796B,
-                likesCount = 112
-            ),
-            CommunityWallpaper(
-                id = "comm_5",
-                title = "الليل النيلي الهادئ",
-                author = "فهد ناصر",
-                description = "خلفية ليلية داكنة موفرة للطاقة بتصميم هندسي مسطح مميز.",
-                preset = WallpaperPreset.INDIGO_SUNSET,
-                colorHex = 0xFF1A237E,
-                likesCount = 79
-            )
-        )
+        repository.loadCommunityWallpapers()
     )
     val communityWallpapers: StateFlow<List<CommunityWallpaper>> = _communityWallpapers.asStateFlow()
 
     fun publishCommunityWallpaper(title: String, author: String, description: String, preset: WallpaperPreset?, uri: String? = null) {
         val newWallpaper = CommunityWallpaper(
             id = "comm_${System.currentTimeMillis()}",
-            title = title.ifBlank { "خلفية مميزة جديدة" },
-            author = author.ifBlank { "مستخدم اللانشر" },
-            description = description.ifBlank { "خلفية جميلة تمت مشاركتها على مجتمع اللانشر." },
-            preset = preset ?: WallpaperPreset.PURPLE_DEEP_BLUE,
+            title = title.ifBlank { "خلفية من ملفات جهازي" },
+            author = author.ifBlank { "أنا" },
+            description = description.ifBlank { "صورة مخصصة تم اختيارها من ذاكرة الهاتف." },
+            preset = preset,
             imageUri = uri,
             colorHex = 0xFF009688,
-            likesCount = 1
+            likesCount = 0
         )
         val current = _communityWallpapers.value.toMutableList()
         current.add(0, newWallpaper)
         _communityWallpapers.value = current
+        repository.saveCommunityWallpapers(current)
+    }
+
+    fun deleteCommunityWallpaper(id: String) {
+        val current = _communityWallpapers.value.filter { it.id != id }
+        _communityWallpapers.value = current
+        repository.saveCommunityWallpapers(current)
     }
 
     fun applyWallpaper(preset: WallpaperPreset?, customUri: String? = null) {
