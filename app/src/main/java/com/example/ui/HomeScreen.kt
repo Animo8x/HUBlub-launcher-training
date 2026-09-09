@@ -127,6 +127,9 @@ fun HomeScreen(
     LollipopTouchRippleContainer(
         soundEnabled = config.soundEffectsEnabled,
         rippleEnabled = config.touchRippleEnabled,
+        waterEffectMode = config.waterEffectMode,
+        soundProfile = config.waterSoundProfile,
+        soundVolume = config.waterSoundVolume,
         modifier = modifier
             .fillMaxSize()
             .testTag("home_screen_root")

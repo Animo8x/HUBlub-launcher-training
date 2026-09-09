@@ -8,6 +8,8 @@ import com.example.model.HomeWidget
 import com.example.model.IconPackStyle
 import com.example.model.LauncherConfig
 import com.example.model.WallpaperPreset
+import com.example.model.WaterEffectMode
+import com.example.model.WaterSoundProfile
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -62,7 +64,17 @@ class LauncherPreferencesRepository(context: Context) {
                 animationsEnabled = json.optBoolean("animationsEnabled", true),
                 soundEffectsEnabled = json.optBoolean("soundEffectsEnabled", true),
                 touchRippleEnabled = json.optBoolean("touchRippleEnabled", true),
-                waterSoundVolume = json.optDouble("waterSoundVolume", 0.6).toFloat(),
+                waterEffectMode = try {
+                    WaterEffectMode.valueOf(json.optString("waterEffectMode", WaterEffectMode.WATER_DROPLET.name))
+                } catch (e: Exception) {
+                    WaterEffectMode.WATER_DROPLET
+                },
+                waterSoundProfile = try {
+                    WaterSoundProfile.valueOf(json.optString("waterSoundProfile", WaterSoundProfile.SOFT_DROP.name))
+                } catch (e: Exception) {
+                    WaterSoundProfile.SOFT_DROP
+                },
+                waterSoundVolume = json.optDouble("waterSoundVolume", 0.5).toFloat(),
                 pageCount = json.optInt("pageCount", 2),
                 firstRunCompleted = prefs.getBoolean(KEY_FIRST_RUN, false)
             )
@@ -88,6 +100,8 @@ class LauncherPreferencesRepository(context: Context) {
             put("animationsEnabled", config.animationsEnabled)
             put("soundEffectsEnabled", config.soundEffectsEnabled)
             put("touchRippleEnabled", config.touchRippleEnabled)
+            put("waterEffectMode", config.waterEffectMode.name)
+            put("waterSoundProfile", config.waterSoundProfile.name)
             put("waterSoundVolume", config.waterSoundVolume.toDouble())
             put("pageCount", config.pageCount)
         }

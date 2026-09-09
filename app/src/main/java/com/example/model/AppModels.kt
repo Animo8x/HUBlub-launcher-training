@@ -95,6 +95,26 @@ data class HomeWidget(
 )
 
 /**
+ * Interactive Water Effect Modes
+ */
+enum class WaterEffectMode {
+    WATER_DROPLET,       // Realistic liquid glass water droplet with gravity tilt & press growth
+    GALAXY_RIPPLE,       // Classic Samsung Galaxy S3/S4 wave ripples
+    HYBRID_BOTH,         // Both water droplet + ripples
+    DISABLED
+}
+
+/**
+ * Water & Interaction Sound Profiles
+ */
+enum class WaterSoundProfile {
+    SOFT_DROP,           // Quiet, gentle, soothing natural water drip
+    SAMSUNG_CLASSIC,     // Classic Samsung Galaxy S3/S4 Nature UX bloop
+    GENTLE_BUBBLE,       // Soft relaxing bubble pop
+    MUTED                // Silent
+}
+
+/**
  * Configuration and user preferences for HUBlub Launcher.
  */
 data class LauncherConfig(
@@ -113,7 +133,9 @@ data class LauncherConfig(
     val animationsEnabled: Boolean = true,
     val soundEffectsEnabled: Boolean = true,
     val touchRippleEnabled: Boolean = true,
-    val waterSoundVolume: Float = 0.6f,
+    val waterEffectMode: WaterEffectMode = WaterEffectMode.WATER_DROPLET,
+    val waterSoundProfile: WaterSoundProfile = WaterSoundProfile.SOFT_DROP,
+    val waterSoundVolume: Float = 0.5f,
     val pageCount: Int = 2,
     val firstRunCompleted: Boolean = false
 )

@@ -6,6 +6,7 @@ import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
 import android.media.SoundPool
+import com.example.model.WaterSoundProfile
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -15,29 +16,38 @@ import kotlin.math.exp
 import kotlin.math.sin
 
 /**
- * High-performance, low-latency audio engine for authentic Samsung Galaxy S3/S4 Nature UX
- * Water Droplet sounds and tactile Material clicks.
+ * High-performance, low-latency audio engine for authentic water effects and tactile Material clicks.
+ *
+ * Supports selectable sound profiles:
+ * - SOFT_DROP: Soothing, gentle, non-intrusive natural water drip (relaxed, low harshness).
+ * - SAMSUNG_CLASSIC: Iconic Samsung Galaxy S3/S4 Nature UX water bloop.
+ * - GENTLE_BUBBLE: Soft, warm, rounded bubble pop.
+ * - MUTED: Complete silence.
  *
  * Uses AudioAttributes.USAGE_MEDIA and CONTENT_TYPE_MUSIC routed to STREAM_MUSIC
- * so sounds play with crystal-clear volume and are never muted by Android system touch sound toggles.
- * Features both SoundPool and zero-latency AudioTrack fallback.
+ * so sounds play with clear volume and are never muted by Android system touch sound toggles.
  */
 object LollipopSoundEffects {
 
     private var soundPool: SoundPool? = null
     private var audioManager: AudioManager? = null
-    private var waterDropSoundId: Int = 0
-    private var waterDropLightSoundId: Int = 0
-    private var waterDropDeepSoundId: Int = 0
+
+    // Sound IDs
+    private var softDropSoundId: Int = 0
+    private var softDropLightSoundId: Int = 0
+    private var samsungDropSoundId: Int = 0
+    private var samsungDropLightSoundId: Int = 0
+    private var gentleBubbleSoundId: Int = 0
     private var buttonClickSoundId: Int = 0
     private var softPopSoundId: Int = 0
+
     private var isInitialized = false
     private var isLoaded = false
     private var lastWaterDropTime = 0L
     private var lastDragDropTime = 0L
     private var soundVariationCounter = 0
 
-    // Direct AudioTrack static fallback for instant 0ms playback without waiting for SoundPool async load
+    // Direct AudioTrack static fallback for instant 0ms playback
     private var fallbackWaterTrack: AudioTrack? = null
 
     private const val SAMPLE_RATE = 44100
@@ -47,8 +57,6 @@ object LollipopSoundEffects {
         try {
             audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
 
-            // Use USAGE_MEDIA so sound is routed through STREAM_MUSIC (Media Volume)
-            // System touch sound settings will NOT mute this!
             val audioAttributes = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -67,47 +75,47 @@ object LollipopSoundEffects {
 
             val cacheDir = context.cacheDir
 
-            // Authentic Samsung Nature UX Water Droplets (v3)
-            val dropFile = File(cacheDir, "samsung_nature_water_drop_v3.wav")
-            val dropLightFile = File(cacheDir, "samsung_nature_water_light_v3.wav")
-            val dropDeepFile = File(cacheDir, "samsung_nature_water_deep_v3.wav")
-            val clickFile = File(cacheDir, "lollipop_click_v3.wav")
-            val popFile = File(cacheDir, "lollipop_pop_v3.wav")
+            // 1. Soft Natural Water Drop (Quiet, pleasant, gentle)
+            val softDropFile = File(cacheDir, "soft_nature_drip_v4.wav")
+            val softDropLightFile = File(cacheDir, "soft_nature_drip_light_v4.wav")
+            val softDropPcm = generateSoftNatureDrip(pitchFactor = 1.0, durationMs = 120)
+            val softDropLightPcm = generateSoftNatureDrip(pitchFactor = 1.15, durationMs = 105)
+            if (!softDropFile.exists() || softDropFile.length() < 100) writeWavFile(softDropFile, softDropPcm)
+            if (!softDropLightFile.exists() || softDropLightFile.length() < 100) writeWavFile(softDropLightFile, softDropLightPcm)
 
-            val mainDropPcm = generateSamsungWaterDrop(pitchFactor = 1.0, durationMs = 150)
-            if (!dropFile.exists() || dropFile.length() < 100) {
-                writeWavFile(dropFile, mainDropPcm)
-            }
+            // 2. Samsung Galaxy Nature UX Classic Drop
+            val samsungDropFile = File(cacheDir, "samsung_nature_water_drop_v4.wav")
+            val samsungDropLightFile = File(cacheDir, "samsung_nature_water_light_v4.wav")
+            val samsungDropPcm = generateSamsungWaterDrop(pitchFactor = 1.0, durationMs = 150)
+            val samsungDropLightPcm = generateSamsungWaterDrop(pitchFactor = 1.14, durationMs = 135)
+            if (!samsungDropFile.exists() || samsungDropFile.length() < 100) writeWavFile(samsungDropFile, samsungDropPcm)
+            if (!samsungDropLightFile.exists() || samsungDropLightFile.length() < 100) writeWavFile(samsungDropLightFile, samsungDropLightPcm)
 
-            if (!dropLightFile.exists() || dropLightFile.length() < 100) {
-                val lightDropPcm = generateSamsungWaterDrop(pitchFactor = 1.14, durationMs = 135)
-                writeWavFile(dropLightFile, lightDropPcm)
-            }
+            // 3. Gentle Bubble Pop
+            val gentleBubbleFile = File(cacheDir, "gentle_bubble_v4.wav")
+            val gentleBubblePcm = generateGentleBubble(durationMs = 95)
+            if (!gentleBubbleFile.exists() || gentleBubbleFile.length() < 100) writeWavFile(gentleBubbleFile, gentleBubblePcm)
 
-            if (!dropDeepFile.exists() || dropDeepFile.length() < 100) {
-                val deepDropPcm = generateSamsungWaterDrop(pitchFactor = 0.88, durationMs = 165)
-                writeWavFile(dropDeepFile, deepDropPcm)
-            }
+            // 4. UI Tactile Click & Pop
+            val clickFile = File(cacheDir, "lollipop_click_v4.wav")
+            val popFile = File(cacheDir, "lollipop_pop_v4.wav")
+            val clickPcm = generateTactileClick(1400.0, 26, 0.95f)
+            val popPcm = generateSoftNatureDrip(pitchFactor = 1.35, durationMs = 90)
+            if (!clickFile.exists() || clickFile.length() < 100) writeWavFile(clickFile, clickPcm)
+            if (!popFile.exists() || popFile.length() < 100) writeWavFile(popFile, popPcm)
 
-            if (!clickFile.exists() || clickFile.length() < 100) {
-                val clickPcm = generateTactileClick(1400.0, 26, 0.95f)
-                writeWavFile(clickFile, clickPcm)
-            }
-
-            if (!popFile.exists() || popFile.length() < 100) {
-                val popPcm = generateSamsungWaterDrop(pitchFactor = 1.25, durationMs = 120)
-                writeWavFile(popFile, popPcm)
-            }
-
-            waterDropSoundId = sp.load(dropFile.absolutePath, 1)
-            waterDropLightSoundId = sp.load(dropLightFile.absolutePath, 1)
-            waterDropDeepSoundId = sp.load(dropDeepFile.absolutePath, 1)
+            // Load into SoundPool
+            softDropSoundId = sp.load(softDropFile.absolutePath, 1)
+            softDropLightSoundId = sp.load(softDropLightFile.absolutePath, 1)
+            samsungDropSoundId = sp.load(samsungDropFile.absolutePath, 1)
+            samsungDropLightSoundId = sp.load(samsungDropLightFile.absolutePath, 1)
+            gentleBubbleSoundId = sp.load(gentleBubbleFile.absolutePath, 1)
             buttonClickSoundId = sp.load(clickFile.absolutePath, 1)
             softPopSoundId = sp.load(popFile.absolutePath, 1)
 
-            // Setup instant static AudioTrack fallback for immediate play
+            // Setup instant static AudioTrack fallback for immediate zero-latency play
             try {
-                val byteBufferSize = mainDropPcm.size * 2
+                val byteBufferSize = softDropPcm.size * 2
                 val track = AudioTrack.Builder()
                     .setAudioAttributes(audioAttributes)
                     .setAudioFormat(
@@ -120,7 +128,7 @@ object LollipopSoundEffects {
                     .setBufferSizeInBytes(byteBufferSize)
                     .setTransferMode(AudioTrack.MODE_STATIC)
                     .build()
-                track.write(mainDropPcm, 0, mainDropPcm.size)
+                track.write(softDropPcm, 0, softDropPcm.size)
                 fallbackWaterTrack = track
             } catch (e: Exception) {}
 
@@ -130,12 +138,62 @@ object LollipopSoundEffects {
     }
 
     /**
+     * Synthesizes an ultra-gentle, calm, relaxing natural water drop.
+     * Warm, organic curve with low frequency, very soft envelope, zero harsh high chirps.
+     */
+    private fun generateSoftNatureDrip(
+        pitchFactor: Double = 1.0,
+        durationMs: Int = 120
+    ): ShortArray {
+        val numSamples = (SAMPLE_RATE * durationMs) / 1000
+        val buffer = ShortArray(numSamples)
+        val twoPi = 2.0 * PI
+        var phase = 0.0
+
+        for (i in 0 until numSamples) {
+            val t = i.toDouble() / SAMPLE_RATE
+            // Warm downward glide 510Hz -> 380Hz
+            val freq = (510.0 - (130.0 * (t / (durationMs / 1000.0)).coerceIn(0.0, 1.0))) * pitchFactor
+            phase += twoPi * freq / SAMPLE_RATE
+
+            // Smooth attack and soft exponential decay
+            val attack = if (t < 0.008) t / 0.008 else 1.0
+            val decay = exp(-t * 29.0)
+            val sampleValue = sin(phase) * attack * decay * 0.62
+
+            buffer[i] = (sampleValue * Short.MAX_VALUE).toInt()
+                .coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt()).toShort()
+        }
+        return buffer
+    }
+
+    /**
+     * Synthesizes a soft, rounded, soothing bubble pop sound.
+     */
+    private fun generateGentleBubble(durationMs: Int = 95): ShortArray {
+        val numSamples = (SAMPLE_RATE * durationMs) / 1000
+        val buffer = ShortArray(numSamples)
+        val twoPi = 2.0 * PI
+        var phase = 0.0
+
+        for (i in 0 until numSamples) {
+            val t = i.toDouble() / SAMPLE_RATE
+            // Upward gentle curve 290Hz -> 510Hz
+            val freq = 290.0 + (220.0 * Math.sqrt(t / (durationMs / 1000.0)).coerceIn(0.0, 1.0))
+            phase += twoPi * freq / SAMPLE_RATE
+
+            val attack = if (t < 0.006) t / 0.006 else 1.0
+            val decay = exp(-t * 36.0)
+            val sampleValue = sin(phase) * attack * decay * 0.55
+
+            buffer[i] = (sampleValue * Short.MAX_VALUE).toInt()
+                .coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt()).toShort()
+        }
+        return buffer
+    }
+
+    /**
      * Synthesizes the iconic Samsung Galaxy S3 / S4 Nature UX water drop ("bloop / drip / plink").
-     * Acoustic Profile:
-     * 1. Air cavity thump: Initial 0-10ms resonant thump as the droplet penetrates the water surface.
-     * 2. Rapid upward bubble chirp (8-40ms): Air cavity pinches off, frequency sweeps from 460Hz to ~2250Hz.
-     * 3. Bell-like chime resonance (40-150ms): Rings at ~2220Hz with secondary harmonic overtone and exponential decay.
-     * 4. Secondary micro-droplet echo (65-110ms): Rebound micro-drop sound.
      */
     private fun generateSamsungWaterDrop(
         pitchFactor: Double = 1.0,
@@ -152,15 +210,15 @@ object LollipopSoundEffects {
         for (i in 0 until numSamples) {
             val t = i.toDouble() / SAMPLE_RATE
 
-            // 1. Air cavity thump (first 10ms)
+            // 1. Air cavity thump
             val thumpFreq = 160.0 * pitchFactor
             phaseThump += twoPi * thumpFreq / SAMPLE_RATE
-            val thumpEnv = if (t < 0.012) sin(PI * (t / 0.012)) * 0.32 else 0.0
+            val thumpEnv = if (t < 0.012) sin(PI * (t / 0.012)) * 0.28 else 0.0
 
             // 2. Main droplet sweep & chime
             val fStart = 460.0 * pitchFactor
             val fPeak = 2260.0 * pitchFactor
-            val chirpDuration = 0.038 // 38ms upward sweep
+            val chirpDuration = 0.038
 
             val currentFreq = if (t < chirpDuration) {
                 val sweepProg = Math.pow(t / chirpDuration, 0.58)
@@ -172,7 +230,6 @@ object LollipopSoundEffects {
             phaseMain += twoPi * currentFreq / SAMPLE_RATE
             phaseHarmonic += twoPi * (currentFreq * 2.0) / SAMPLE_RATE
 
-            // Main droplet envelope: instant attack and natural liquid decay
             val attack = if (t < 0.004) t / 0.004 else 1.0
             val decay = exp(-t * 26.0)
             val mainEnv = attack * decay
@@ -185,15 +242,15 @@ object LollipopSoundEffects {
                 phaseEcho += twoPi * echoFreq / SAMPLE_RATE
                 val echoAttack = if (tEcho < 0.005) tEcho / 0.005 else 1.0
                 val echoDecay = exp(-tEcho * 42.0)
-                echoEnv = echoAttack * echoDecay * 0.30
+                echoEnv = echoAttack * echoDecay * 0.25
             }
 
             val sampleValue = (
-                sin(phaseMain) * 0.72 +
-                sin(phaseHarmonic) * 0.20 +
+                sin(phaseMain) * 0.70 +
+                sin(phaseHarmonic) * 0.18 +
                 sin(phaseThump) * thumpEnv +
                 sin(phaseEcho) * echoEnv
-            ) * mainEnv * 0.98
+            ) * mainEnv * 0.90
 
             buffer[i] = (sampleValue * Short.MAX_VALUE).toInt()
                 .coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt()).toShort()
@@ -228,22 +285,19 @@ object LollipopSoundEffects {
         val totalSize = 36 + dataSize
         val header = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN)
 
-        // RIFF chunk
         header.put('R'.code.toByte()).put('I'.code.toByte()).put('F'.code.toByte()).put('F'.code.toByte())
         header.putInt(totalSize)
         header.put('W'.code.toByte()).put('A'.code.toByte()).put('V'.code.toByte()).put('E'.code.toByte())
 
-        // fmt chunk
         header.put('f'.code.toByte()).put('m'.code.toByte()).put('t'.code.toByte()).put(' '.code.toByte())
         header.putInt(16)
-        header.putShort(1)  // PCM
-        header.putShort(1)  // Mono
+        header.putShort(1)
+        header.putShort(1)
         header.putInt(SAMPLE_RATE)
         header.putInt(SAMPLE_RATE * 2)
         header.putShort(2)
         header.putShort(16)
 
-        // data chunk
         header.put('d'.code.toByte()).put('a'.code.toByte()).put('t'.code.toByte()).put('a'.code.toByte())
         header.putInt(dataSize)
 
@@ -258,29 +312,43 @@ object LollipopSoundEffects {
     }
 
     /**
-     * Plays authentic Samsung Galaxy Nature UX water droplet sound.
-     * Features alternating pitch variations (Standard, High, Deep) for organic realism.
+     * Plays water drop sound based on selected profile and volume.
      */
-    fun playWaterDrop(enabled: Boolean = true, pitchVariant: Int? = null) {
-        if (!enabled) return
+    fun playWaterDrop(
+        enabled: Boolean = true,
+        profile: WaterSoundProfile = WaterSoundProfile.SOFT_DROP,
+        volume: Float = 0.5f,
+        pitchVariant: Int? = null
+    ) {
+        if (!enabled || profile == WaterSoundProfile.MUTED) return
         val now = System.currentTimeMillis()
-        if (now - lastWaterDropTime < 65) return
+        if (now - lastWaterDropTime < 60) return
         lastWaterDropTime = now
 
         val sp = soundPool
-        val variant = pitchVariant ?: (soundVariationCounter++ % 3)
-        val soundId = when (variant) {
-            1 -> if (waterDropLightSoundId != 0) waterDropLightSoundId else waterDropSoundId
-            2 -> if (waterDropDeepSoundId != 0) waterDropDeepSoundId else waterDropSoundId
-            else -> waterDropSoundId
+        val variant = pitchVariant ?: (soundVariationCounter++ % 2)
+
+        val soundId = when (profile) {
+            WaterSoundProfile.SOFT_DROP -> {
+                if (variant == 1 && softDropLightSoundId != 0) softDropLightSoundId else softDropSoundId
+            }
+            WaterSoundProfile.SAMSUNG_CLASSIC -> {
+                if (variant == 1 && samsungDropLightSoundId != 0) samsungDropLightSoundId else samsungDropSoundId
+            }
+            WaterSoundProfile.GENTLE_BUBBLE -> {
+                gentleBubbleSoundId
+            }
+            WaterSoundProfile.MUTED -> 0
         }
 
+        val effectiveVolume = volume.coerceIn(0.1f, 1.0f)
+
         if (sp != null && soundId != 0 && isLoaded) {
-            sp.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f)
-        } else {
-            // Instant playback via AudioTrack fallback
+            sp.play(soundId, effectiveVolume, effectiveVolume, 1, 0, 1.0f)
+        } else if (profile != WaterSoundProfile.MUTED) {
             try {
                 fallbackWaterTrack?.let { track ->
+                    track.setVolume(effectiveVolume)
                     track.stop()
                     track.reloadStaticData()
                     track.play()
@@ -294,32 +362,43 @@ object LollipopSoundEffects {
     }
 
     /**
-     * Plays light water ripple sound during dragging across the glass screen.
+     * Plays light water ripple sound during dragging across the screen.
      */
-    fun playDragWaterRipple(enabled: Boolean = true) {
-        if (!enabled) return
+    fun playDragWaterRipple(
+        enabled: Boolean = true,
+        profile: WaterSoundProfile = WaterSoundProfile.SOFT_DROP,
+        volume: Float = 0.5f
+    ) {
+        if (!enabled || profile == WaterSoundProfile.MUTED) return
         val now = System.currentTimeMillis()
         if (now - lastDragDropTime < 110) return
         lastDragDropTime = now
 
+        val dragVolume = (volume * 0.70f).coerceIn(0.1f, 0.9f)
+        val soundId = when (profile) {
+            WaterSoundProfile.SOFT_DROP -> if (softDropLightSoundId != 0) softDropLightSoundId else softDropSoundId
+            WaterSoundProfile.SAMSUNG_CLASSIC -> if (samsungDropLightSoundId != 0) samsungDropLightSoundId else samsungDropSoundId
+            WaterSoundProfile.GENTLE_BUBBLE -> gentleBubbleSoundId
+            WaterSoundProfile.MUTED -> 0
+        }
+
         val sp = soundPool
-        val soundId = if (waterDropLightSoundId != 0) waterDropLightSoundId else waterDropSoundId
         if (sp != null && soundId != 0 && isLoaded) {
-            sp.play(soundId, 0.75f, 0.75f, 1, 0, 1.08f)
+            sp.play(soundId, dragVolume, dragVolume, 1, 0, 1.08f)
         } else {
-            playWaterDrop(enabled = true, pitchVariant = 1)
+            playWaterDrop(enabled = true, profile = profile, volume = dragVolume, pitchVariant = 1)
         }
     }
 
     /**
-     * Plays tactile Material click sound with audible feedback.
+     * Plays tactile Material click sound.
      */
     fun playButtonClick(enabled: Boolean = true) {
         if (!enabled) return
         val sp = soundPool
         val id = buttonClickSoundId
         if (sp != null && id != 0 && isLoaded) {
-            sp.play(id, 0.95f, 0.95f, 1, 0, 1.0f)
+            sp.play(id, 0.85f, 0.85f, 1, 0, 1.0f)
         } else {
             audioManager?.playSoundEffect(android.view.SoundEffectConstants.CLICK)
         }
@@ -333,7 +412,7 @@ object LollipopSoundEffects {
         val sp = soundPool
         val id = softPopSoundId
         if (sp != null && id != 0 && isLoaded) {
-            sp.play(id, 0.90f, 0.90f, 1, 0, 1.0f)
+            sp.play(id, 0.80f, 0.80f, 1, 0, 1.0f)
         } else {
             audioManager?.playSoundEffect(android.view.SoundEffectConstants.CLICK)
         }

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -65,6 +66,8 @@ import androidx.compose.ui.window.Dialog
 import com.example.model.IconPackStyle
 import com.example.model.LauncherConfig
 import com.example.model.WallpaperPreset
+import com.example.model.WaterEffectMode
+import com.example.model.WaterSoundProfile
 import com.example.ui.theme.LollipopAmber500
 import com.example.ui.theme.LollipopTeal500
 import com.example.ui.theme.LollipopTeal700
@@ -300,19 +303,197 @@ fun LollipopSettingsDialog(
                     // Interaction & Feedback Section
                     SectionHeader("INTERACTION & TACTILE FEEDBACK")
 
-                    SettingToggle(
-                        title = "Samsung Nature UX Water Drop Sound",
-                        subtitle = "صوت قطرة ماء سامسونج الكلاسيكي النقي (Galaxy S3/S4) عالي الوضوح بدون كتم",
-                        checked = config.soundEffectsEnabled,
-                        onCheckedChange = { onConfigChange(config.copy(soundEffectsEnabled = it)) }
+                    Text(
+                        text = "نمط تأثير الماء التفاعلي (Interactive Water Effect)",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = LollipopTeal700,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                     )
 
-                    SettingToggle(
-                        title = "OG Liquid Glass Water Ripple (ماء سامسونج التفاعلي)",
-                        subtitle = "تموجات ماء واقعية على الشاشة مع قطرات ماء وانكسارات ضوئية وأثر انسيابي عند السحب",
-                        checked = config.touchRippleEnabled,
-                        onCheckedChange = { onConfigChange(config.copy(touchRippleEnabled = it)) }
+                    // 1. Water Visual Effect Mode Selector
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFF5F5F5))
+                            .padding(8.dp)
+                    ) {
+                        val effectOptions = listOf(
+                            Triple(
+                                WaterEffectMode.WATER_DROPLET,
+                                "قطرة الماء الحقيقية (Water Droplet)",
+                                "مظهر ماء حقيقي ثلاثي الأبعاد، تكبر بالضغط، وتنزلق تلقائياً حسب ميلان وجاذبية الهاتف"
+                            ),
+                            Triple(
+                                WaterEffectMode.GALAXY_RIPPLE,
+                                "تموجات ماء سامسونج (Galaxy Ripple)",
+                                "موجات دائرية متتالية كلاسيكية تحاكي شاشات سامسونج القديمة"
+                            ),
+                            Triple(
+                                WaterEffectMode.HYBRID_BOTH,
+                                "القطرة + التموجات معاً (Both / Hybrid)",
+                                "دمج قطرات الماء ثلاثية الأبعاد مع التموجات الدائرية المتزامنة"
+                            ),
+                            Triple(
+                                WaterEffectMode.DISABLED,
+                                "إيقاف التأثير (Off)",
+                                "بدون أي مؤثرات بصرية مائية على الشاشة"
+                            )
+                        )
+
+                        effectOptions.forEach { (mode, title, desc) ->
+                            val selected = config.touchRippleEnabled && config.waterEffectMode == mode
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (mode == WaterEffectMode.DISABLED) {
+                                            onConfigChange(config.copy(touchRippleEnabled = false, waterEffectMode = mode))
+                                        } else {
+                                            onConfigChange(config.copy(touchRippleEnabled = true, waterEffectMode = mode))
+                                        }
+                                        LollipopSoundEffects.playWaterDrop(
+                                            enabled = config.soundEffectsEnabled,
+                                            profile = config.waterSoundProfile,
+                                            volume = config.waterSoundVolume
+                                        )
+                                    }
+                                    .padding(vertical = 6.dp, horizontal = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = selected,
+                                    onClick = null,
+                                    colors = RadioButtonDefaults.colors(selectedColor = LollipopTeal700)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(text = title, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = MaterialTextPrimary)
+                                    Text(text = desc, fontSize = 11.sp, color = MaterialTextSecondary)
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "نغمة وصوت الماء (Water Sound Profile)",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = LollipopTeal700,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                     )
+
+                    // 2. Sound Profile Selector
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFF5F5F5))
+                            .padding(8.dp)
+                    ) {
+                        val soundOptions = listOf(
+                            Triple(
+                                WaterSoundProfile.SOFT_DROP,
+                                "قطرة ماء هادئة وناعمة (Soft Natural Drip)",
+                                "صوت ماء خفيف ومهدئ ومريح جداً للأذن وغير مزعج إطلاقاً"
+                            ),
+                            Triple(
+                                WaterSoundProfile.SAMSUNG_CLASSIC,
+                                "نغمة سامسونج الكلاسيكية (Samsung Nature Bloop)",
+                                "صوت النقر المائي الأصلي لهواتف Galaxy S3 / S4"
+                            ),
+                            Triple(
+                                WaterSoundProfile.GENTLE_BUBBLE,
+                                "فقاعة ماء لطيفة (Gentle Bubble Pop)",
+                                "صوت فقاعة مائية ناعمة وخفيفة"
+                            ),
+                            Triple(
+                                WaterSoundProfile.MUTED,
+                                "صامت (Mute / Silent)",
+                                "كتم جميع أصوات اللمس والتفاعل المائي"
+                            )
+                        )
+
+                        soundOptions.forEach { (profile, title, desc) ->
+                            val selected = config.soundEffectsEnabled && config.waterSoundProfile == profile
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (profile == WaterSoundProfile.MUTED) {
+                                            onConfigChange(config.copy(soundEffectsEnabled = false, waterSoundProfile = profile))
+                                        } else {
+                                            onConfigChange(config.copy(soundEffectsEnabled = true, waterSoundProfile = profile))
+                                            LollipopSoundEffects.playWaterDrop(
+                                                enabled = true,
+                                                profile = profile,
+                                                volume = config.waterSoundVolume
+                                            )
+                                        }
+                                    }
+                                    .padding(vertical = 6.dp, horizontal = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = selected,
+                                    onClick = null,
+                                    colors = RadioButtonDefaults.colors(selectedColor = LollipopTeal700)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(text = title, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = MaterialTextPrimary)
+                                    Text(text = desc, fontSize = 11.sp, color = MaterialTextSecondary)
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // 3. Sound Volume Slider
+                    if (config.soundEffectsEnabled && config.waterSoundProfile != WaterSoundProfile.MUTED) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "مستوى صوت الماء:",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTextPrimary
+                            )
+                            Text(
+                                text = "${(config.waterSoundVolume * 100).toInt()}%",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = LollipopTeal700
+                            )
+                        }
+                        Slider(
+                            value = config.waterSoundVolume,
+                            onValueChange = { newVol ->
+                                onConfigChange(config.copy(waterSoundVolume = newVol))
+                            },
+                            onValueChangeFinished = {
+                                LollipopSoundEffects.playWaterDrop(
+                                    enabled = true,
+                                    profile = config.waterSoundProfile,
+                                    volume = config.waterSoundVolume
+                                )
+                            },
+                            valueRange = 0.1f..1.0f,
+                            colors = SliderDefaults.colors(
+                                thumbColor = LollipopTeal700,
+                                activeTrackColor = LollipopTeal500
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     SettingToggle(
                         title = "Enable Motion Animations",
@@ -403,9 +584,9 @@ fun LollipopSettingsDialog(
 
                     // About
                     SectionHeader("ABOUT HUBLUB LAUNCHER")
-                    Text("HUBlub Launcher v3.0 (Galaxy Nature Water Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
+                    Text("HUBlub Launcher v3.5 (Water Droplet & Gravity Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
                     Text(
-                        "An authentic Launcher experience with legendary Samsung Galaxy Nature UX liquid water ripples, authentic water droplet acoustics, freeform & 5 icon packs, expandable drawer, and custom wallpapers.",
+                        "An authentic Launcher experience with physical 3D liquid Water Droplets with Accelerometer Gravity tilt physics, press-and-hold growth, soothing water sound profiles, and classic Samsung Galaxy Nature ripples.",
                         fontSize = 12.sp,
                         color = MaterialTextSecondary,
                         modifier = Modifier.padding(top = 2.dp)
@@ -503,8 +684,21 @@ fun LollipopSettingsDialog(
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
+                    // v3.5
+                    Text("v3.5 (Water Droplet & Gravity Edition - الإصدار الأحدث)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("• إضافة خيار قطرة الماء الحقيقية (Water Droplet) بمظهر زجاجي سائل ثلاثي الأبعاد يبدو كالماء الحقيقي تماماً.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• تضخم ونمو قطرة الماء بشكل طبيعي وانسيابي عند الاستمرار بالضغط على الشاشة (Press & Hold).", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• دعم كامل لمستشعر الميلان والجاذبية (Accelerometer): تنزلق قطرات الماء تلقائياً باتجاه ميلان الهاتف (يمين، يسار، أعلى، أسفل) وتترك أثراً مائياً رطباً يتبخر تدريجياً.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• خيارات متعددة لنغمات الماء تشمل قطرة ماء هادئة وناعمة جداً وغير مزعجة (Soft Natural Drip)، نغمة سامسونج الكلاسيكية، صوت فقاعة لطيف، أو صامت.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• شريط للتحكم الدقيق بمستوى صوت الماء والتفاعل لتجربة مريحة وممتعة.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• الحفاظ الكامل على نمط تموجات سامسونج الكلاسيكية القديم وإمكانية التبديل بينهما أو دمجهما.", fontSize = 13.sp, color = MaterialTextPrimary)
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0x1F000000))
+                    Spacer(modifier = Modifier.height(12.dp))
+
                     // v3.0
-                    Text("v3.0 (Galaxy Nature Water Edition - الإصدار الأحدث)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("v3.0 (مستقر)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextSecondary)
                     Text("• إعادة بناء كاملة لميزة الماء التفاعلي (OG Liquid Glass) بمحاكاة شاشات سامسونج جالاكسي الكلاسيكية (Nature UX).", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• تموجات دائرية واقعية متعددة الطبقات (Concentric Wave Packets) مع قمم وقيعان انكسارية طبيعية.", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• قطرة ماء ثلاثية الأبعاد تنبثق في موضع اللمس مع انعكاس ضوئي زجاجي حقيقي وظلال انكسارية.", fontSize = 13.sp, color = MaterialTextPrimary)
