@@ -301,15 +301,15 @@ fun LollipopSettingsDialog(
                     SectionHeader("INTERACTION & TACTILE FEEDBACK")
 
                     SettingToggle(
-                        title = "Soothing Motion Sound",
-                        subtitle = "Gentle, relaxing water droplet click for taps and drawer actions",
+                        title = "Samsung Nature UX Water Drop Sound",
+                        subtitle = "صوت قطرة ماء سامسونج الكلاسيكي النقي (Galaxy S3/S4) عالي الوضوح بدون كتم",
                         checked = config.soundEffectsEnabled,
                         onCheckedChange = { onConfigChange(config.copy(soundEffectsEnabled = it)) }
                     )
 
                     SettingToggle(
-                        title = "Android 5.0 Water Drop Ripple",
-                        subtitle = "Radial touch droplet wave expands and dissolves smoothly on tap",
+                        title = "OG Liquid Glass Water Ripple (ماء سامسونج التفاعلي)",
+                        subtitle = "تموجات ماء واقعية على الشاشة مع قطرات ماء وانكسارات ضوئية وأثر انسيابي عند السحب",
                         checked = config.touchRippleEnabled,
                         onCheckedChange = { onConfigChange(config.copy(touchRippleEnabled = it)) }
                     )
@@ -403,9 +403,9 @@ fun LollipopSettingsDialog(
 
                     // About
                     SectionHeader("ABOUT HUBLUB LAUNCHER")
-                    Text("HUBlub Launcher v2.5 (Lollipop 5.0 Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
+                    Text("HUBlub Launcher v3.0 (Galaxy Nature Water Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
                     Text(
-                        "An authentic Android 5.0 Lollipop Native Launcher experience with freeform & 5 icon packs, expandable drawer search, dedicated themes app, and original Material Design.",
+                        "An authentic Launcher experience with legendary Samsung Galaxy Nature UX liquid water ripples, authentic water droplet acoustics, freeform & 5 icon packs, expandable drawer, and custom wallpapers.",
                         fontSize = 12.sp,
                         color = MaterialTextSecondary,
                         modifier = Modifier.padding(top = 2.dp)
@@ -503,8 +503,21 @@ fun LollipopSettingsDialog(
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
+                    // v3.0
+                    Text("v3.0 (Galaxy Nature Water Edition - الإصدار الأحدث)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("• إعادة بناء كاملة لميزة الماء التفاعلي (OG Liquid Glass) بمحاكاة شاشات سامسونج جالاكسي الكلاسيكية (Nature UX).", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• تموجات دائرية واقعية متعددة الطبقات (Concentric Wave Packets) مع قمم وقيعان انكسارية طبيعية.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• قطرة ماء ثلاثية الأبعاد تنبثق في موضع اللمس مع انعكاس ضوئي زجاجي حقيقي وظلال انكسارية.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• تموج انسيابي متدفق عند السحب (Drag Fluid Wake) يتتبع حركة الإصبع على الشاشة بسلاسة فائقة.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• صوت قطرة ماء سامسونج الشهير الأصلي نقي وعالي الوضوح يعمل عبر قناة الوسائط لضمان عدم كتمه.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• كفاءة وأداء فائق 60/120 FPS عبر رسم Skia Canvas فوري بدون أي استهلاك زائد للطاقة.", fontSize = 13.sp, color = MaterialTextPrimary)
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0x1F000000))
+                    Spacer(modifier = Modifier.height(12.dp))
+
                     // v2.5
-                    Text("v2.5 (lollipop 5.0 - الإصدار الأحدث)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("v2.5 (مستقر)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextSecondary)
                     Text("• الشكل الحر الطبيعي للأيقونات بدون أي خلفية دائرية بيضاء إجبارية.", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• توفير 5 حزم أيقونات متنوعة من الحديث للريترو كلاسيك.", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• زر مكبر كأيقونة بحث قابلة للفتح والإغلاق في درج التطبيقات بدلاً من الشريط القديم.", fontSize = 13.sp, color = MaterialTextPrimary)

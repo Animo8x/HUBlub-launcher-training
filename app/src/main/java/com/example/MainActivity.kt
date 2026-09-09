@@ -95,6 +95,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        volumeControlStream = android.media.AudioManager.STREAM_MUSIC
 
         // 1. Initialize high performance SoundPool engine
         LollipopSoundEffects.init(this)

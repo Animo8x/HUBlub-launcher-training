@@ -100,7 +100,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                 packageName = "com.example.themes",
                 activityName = "ThemesActivity",
                 label = "الثيمات (Themes)",
-                versionName = "2.5",
+                versionName = "3.0",
                 isSystemApp = true
             )
 
@@ -109,7 +109,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                 packageName = "com.example.launcher.settings",
                 activityName = "SettingsActivity",
                 label = "إعدادات اللانشر (Settings)",
-                versionName = "2.5",
+                versionName = "3.0",
                 isSystemApp = true
             )
 
