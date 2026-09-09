@@ -1,10 +1,15 @@
 package com.example.ui.components
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,7 +19,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.testTag
@@ -29,14 +36,15 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Authentic Android 5.0 Lollipop digital clock and date widget.
+ * Android 5.0 Lollipop digital clock and date widget with optional modern Liquid Glass styling.
  * Features classic Roboto typography with light hour and bold minute styling.
  * Clicking opens the system Clock/Alarm application.
  */
 @Composable
 fun LollipopClockWidget(
     onClockClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    liquidGlassTheme: Boolean = false
 ) {
     var currentTime by remember { mutableStateOf(Date()) }
 
@@ -61,11 +69,37 @@ fun LollipopClockWidget(
         blurRadius = 4f
     )
 
-    Column(
-        modifier = modifier
+    val glassShape = RoundedCornerShape(24.dp)
+    val columnModifier = if (liquidGlassTheme) {
+        modifier
+            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .clip(glassShape)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color(0x35000000), Color(0x18000000))
+                )
+            )
+            .border(
+                border = BorderStroke(
+                    1.dp,
+                    Brush.verticalGradient(
+                        colors = listOf(Color(0x66FFFFFF), Color(0x18FFFFFF))
+                    )
+                ),
+                shape = glassShape
+            )
+            .padding(horizontal = 28.dp, vertical = 12.dp)
+            .testTag("lollipop_clock_widget")
+            .clickable(onClick = onClockClick)
+    } else {
+        modifier
             .padding(vertical = 12.dp)
             .testTag("lollipop_clock_widget")
-            .clickable(onClick = onClockClick),
+            .clickable(onClick = onClockClick)
+    }
+
+    Column(
+        modifier = columnModifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

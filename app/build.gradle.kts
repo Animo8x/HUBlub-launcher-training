@@ -17,8 +17,8 @@ android {
     applicationId = "com.aistudio.hublublauncher.jxpqwe"
     minSdk = 24
     targetSdk = 36
-    versionCode = 4
-    versionName = "3.5"
+    versionCode = 6
+    versionName = "4.1"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

@@ -95,12 +95,15 @@ data class HomeWidget(
 )
 
 /**
- * Interactive Water Effect Modes
+ * Interactive Water & Particle Effect Modes
  */
 enum class WaterEffectMode {
-    WATER_DROPLET,       // Realistic liquid glass water droplet with gravity tilt & press growth
-    GALAXY_RIPPLE,       // Classic Samsung Galaxy S3/S4 wave ripples
-    HYBRID_BOTH,         // Both water droplet + ripples
+    GALAXY_RIPPLE,       // Classic Samsung Galaxy S3/S4 Nature UX wave ripples (Default)
+    WATER_DROPLET,       // Realistic 3D liquid glass water droplet
+    HYBRID_BOTH,         // Both 3D water droplet + concentric ripples
+    ELECTRIC_AQUA,       // Electric water sparks & plasma arcs (كهرباء وتوهج مائي)
+    STARLIGHT_SPARKLE,   // Sparkling glitter stars & diamond dust (بريق ونجوم لامعة)
+    ZEN_SPRING,          // Minimalist Zen spring dew beads & gentle ripple (ينبوع الزن الهادئ)
     DISABLED
 }
 
@@ -128,12 +131,14 @@ data class LauncherConfig(
     val customWallpaperUri: String? = null,
     val iconPack: IconPackStyle = IconPackStyle.ANDROID_5_ROUND,
     val drawerStyle: DrawerStyle = DrawerStyle.CLASSIC_SOLID,
+    val liquidGlassTheme: Boolean = false, // Modern Liquid Glass visual theme with rounded curves and frosted glass
     val performanceMode: Boolean = false,
     val nostalgiaMode: Boolean = true,
     val animationsEnabled: Boolean = true,
     val soundEffectsEnabled: Boolean = true,
     val touchRippleEnabled: Boolean = true,
-    val waterEffectMode: WaterEffectMode = WaterEffectMode.WATER_DROPLET,
+    val waterEffectMode: WaterEffectMode = WaterEffectMode.GALAXY_RIPPLE, // Default is the classic old effect as requested!
+    val waterTiltGravityEnabled: Boolean = true,
     val waterSoundProfile: WaterSoundProfile = WaterSoundProfile.SOFT_DROP,
     val waterSoundVolume: Float = 0.5f,
     val pageCount: Int = 2,

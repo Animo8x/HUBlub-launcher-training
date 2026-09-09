@@ -100,7 +100,8 @@ fun LollipopAppDrawer(
     columns: Int = 4,
     iconSize: Dp = 52.dp,
     showLabels: Boolean = true,
-    isDarkTheme: Boolean = false
+    isDarkTheme: Boolean = false,
+    liquidGlassTheme: Boolean = false
 ) {
     var isSearchExpanded by remember { mutableStateOf(searchQuery.isNotEmpty()) }
 
@@ -120,18 +121,27 @@ fun LollipopAppDrawer(
         ),
         modifier = modifier.fillMaxSize()
     ) {
-        // Compute background according to selected DrawerStyle
-        val backgroundColor = when (drawerStyle) {
-            DrawerStyle.CLASSIC_SOLID -> if (isDarkTheme) Color(0xFF263238) else Color.White
-            DrawerStyle.FROSTED_BLUR -> if (isDarkTheme) Color(0xCC1A2327) else Color(0xDCF5F7FA)
-            DrawerStyle.TRANSLUCENT_GLASS -> Color(0xD0121E24)
-            DrawerStyle.SEMI_TRANSPARENT -> Color(0x90121E24)
-            DrawerStyle.CRYSTAL_CLEAR -> Color(0x40121E24)
+        // Compute background according to selected DrawerStyle or Liquid Glass
+        val backgroundColor = if (liquidGlassTheme) {
+            if (isDarkTheme) Color(0xD9101E26) else Color(0xDCF0F8FF)
+        } else {
+            when (drawerStyle) {
+                DrawerStyle.CLASSIC_SOLID -> if (isDarkTheme) Color(0xFF263238) else Color.White
+                DrawerStyle.FROSTED_BLUR -> if (isDarkTheme) Color(0xCC1A2327) else Color(0xDCF5F7FA)
+                DrawerStyle.TRANSLUCENT_GLASS -> Color(0xD0121E24)
+                DrawerStyle.SEMI_TRANSPARENT -> Color(0x90121E24)
+                DrawerStyle.CRYSTAL_CLEAR -> Color(0x40121E24)
+            }
         }
 
-        val isLightBg = drawerStyle == DrawerStyle.CLASSIC_SOLID && !isDarkTheme ||
-                (drawerStyle == DrawerStyle.FROSTED_BLUR && !isDarkTheme)
-        val headerColor = if (isLightBg) Color(0xFFEEEEEE) else Color(0x33000000)
+        val isLightBg = (drawerStyle == DrawerStyle.CLASSIC_SOLID && !isDarkTheme) ||
+                (drawerStyle == DrawerStyle.FROSTED_BLUR && !isDarkTheme) ||
+                (liquidGlassTheme && !isDarkTheme)
+        val headerColor = if (liquidGlassTheme) {
+            if (isLightBg) Color(0x55FFFFFF) else Color(0x44000000)
+        } else {
+            if (isLightBg) Color(0xFFEEEEEE) else Color(0x33000000)
+        }
         val headerTextColor = if (isLightBg) Color(0xFF263238) else Color.White
         val bodyTextColor = if (isLightBg) MaterialTextPrimary else Color.White
 
@@ -139,6 +149,7 @@ fun LollipopAppDrawer(
             modifier = Modifier
                 .fillMaxSize()
                 .testTag("lollipop_app_drawer"),
+            shape = if (liquidGlassTheme) RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp) else RoundedCornerShape(0.dp),
             color = backgroundColor
         ) {
             Column(

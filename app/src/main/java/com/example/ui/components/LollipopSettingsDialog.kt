@@ -244,6 +244,13 @@ fun LollipopSettingsDialog(
                         onCheckedChange = { onConfigChange(config.copy(showGoogleSearchBar = it)) }
                     )
 
+                    SettingToggle(
+                        title = "Liquid Glass Theme (نمط الزجاج السائل الحديث)",
+                        subtitle = "واجهات زجاجية حديثة بحواف دائرية أنيقة تشمل الدوك وشريط البحث ودرج التطبيقات (Modern Rounded Frosted Glass)",
+                        checked = config.liquidGlassTheme,
+                        onCheckedChange = { onConfigChange(config.copy(liquidGlassTheme = it)) }
+                    )
+
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
@@ -321,23 +328,38 @@ fun LollipopSettingsDialog(
                     ) {
                         val effectOptions = listOf(
                             Triple(
-                                WaterEffectMode.WATER_DROPLET,
-                                "قطرة الماء الحقيقية (Water Droplet)",
-                                "مظهر ماء حقيقي ثلاثي الأبعاد، تكبر بالضغط، وتنزلق تلقائياً حسب ميلان وجاذبية الهاتف"
+                                WaterEffectMode.GALAXY_RIPPLE,
+                                "تموجات ماء سامسونج الكلاسيكية (Galaxy Ripple) ★ الافتراضي",
+                                "موجات دائرية متتالية كلاسيكية تحاكي شاشات سامسونج القديمة مع قطرة لمس مركزية متبخرة"
                             ),
                             Triple(
-                                WaterEffectMode.GALAXY_RIPPLE,
-                                "تموجات ماء سامسونج (Galaxy Ripple)",
-                                "موجات دائرية متتالية كلاسيكية تحاكي شاشات سامسونج القديمة"
+                                WaterEffectMode.WATER_DROPLET,
+                                "قطرة الماء ثلاثية الأبعاد (3D Liquid Glass Droplet)",
+                                "مظهر ماء حقيقي ثلاثي الأبعاد نصف شفاف مع انكسار بصري، تكبر بالضغط وتنزلق بلزوجة عند إمالة الهاتف"
                             ),
                             Triple(
                                 WaterEffectMode.HYBRID_BOTH,
-                                "القطرة + التموجات معاً (Both / Hybrid)",
+                                "القطرة ثلاثية الأبعاد + التموجات معاً (Both / Hybrid)",
                                 "دمج قطرات الماء ثلاثية الأبعاد مع التموجات الدائرية المتزامنة"
                             ),
                             Triple(
+                                WaterEffectMode.ELECTRIC_AQUA,
+                                "الكهرباء والتوهج المائي (Electric Aqua)",
+                                "شرارات كهربائية مائية متوهجة وأقواس بلازما سريعة ومشعة عند اللمس"
+                            ),
+                            Triple(
+                                WaterEffectMode.STARLIGHT_SPARKLE,
+                                "بريق النجوم والشرار اللامع (Starlight Shimmer)",
+                                "نجوم متلألئة بأربعة أطراف مع غبار ماسي دوّار ولمعان ساطع"
+                            ),
+                            Triple(
+                                WaterEffectMode.ZEN_SPRING,
+                                "ينبوع الزن والندى الناعم (Zen Dew Spring)",
+                                "موجة ينبوع ناعمة بسيطة وهادئة مع حبات ندى لؤلؤية رقيقة تطفو وتتبخر"
+                            ),
+                            Triple(
                                 WaterEffectMode.DISABLED,
-                                "إيقاف التأثير (Off)",
+                                "إيقاف المؤثرات البصرية (Off)",
                                 "بدون أي مؤثرات بصرية مائية على الشاشة"
                             )
                         )
@@ -375,6 +397,16 @@ fun LollipopSettingsDialog(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Tilt Gravity Toggle: Enable/disable slow water sliding when phone tilts
+                    SettingToggle(
+                        title = "انزلاق وسقوط الماء عند تحريك الهاتف (Tilt Motion)",
+                        subtitle = "عند التفعيل: تنزلق القطرات بهدوء مع ميلان الهاتف. عند الإيقاف: تثبت القطرات مكانها تماماً وتتبخر تدريجياً دون أن تنزلق لأسفل",
+                        checked = config.waterTiltGravityEnabled,
+                        onCheckedChange = { onConfigChange(config.copy(waterTiltGravityEnabled = it)) }
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -584,9 +616,9 @@ fun LollipopSettingsDialog(
 
                     // About
                     SectionHeader("ABOUT HUBLUB LAUNCHER")
-                    Text("HUBlub Launcher v3.5 (Water Droplet & Gravity Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
+                    Text("HUBlub Launcher v4.1 (Liquid Glass & Interactive Particles Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
                     Text(
-                        "An authentic Launcher experience with physical 3D liquid Water Droplets with Accelerometer Gravity tilt physics, press-and-hold growth, soothing water sound profiles, and classic Samsung Galaxy Nature ripples.",
+                        "An authentic Launcher experience with Liquid Glass theme, physical 3D water droplets, stationary evaporation without tilt slide, classic Samsung Galaxy Nature ripples, and interactive particles.",
                         fontSize = 12.sp,
                         color = MaterialTextSecondary,
                         modifier = Modifier.padding(top = 2.dp)
@@ -684,8 +716,32 @@ fun LollipopSettingsDialog(
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
+                    // v4.1
+                    Text("v4.1 (Liquid Glass & New Interactive Effects - الإصدار الأحدث)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("• تفعيل النمط القديم (تموجات سامسونج الكلاسيكية) كخيار افتراضي عند أول تشغيل للتطبيق مع إمكانية التغيير من الإعدادات.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• ثبات قطرات الماء في مكانها وتبخرها تدريجياً وبهدوء عند إيقاف وضع الانزلاق (Tilt Motion) دون أي انزلاق لأسفل الشاشة.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• تحسين مظهر قطرة الماء لتكون شبه شفافة وواضحة الرؤية مع الحفاظ على الانكسار البصري المتقن.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• ميزة نمط الزجاج السائل (Liquid Glass Theme): تحويل الدوك ودرج التطبيقات وشريط البحث لأشكال زجاجية منحنية الحواف وفائقة الحداثة قابلة للتشغيل من الإعدادات.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• إضافة 3 مؤثرات تفاعلية جديدة خفيفة ومتقنة: الكهرباء والتوهج المائي (Electric Aqua)، بريق النجوم اللامع (Starlight Sparkle)، وينبوع الزن والندى الناعم (Zen Spring).", fontSize = 13.sp, color = MaterialTextPrimary)
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0x1F000000))
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // v4.0
+                    Text("v4.0 (Ultra-Realistic 3D Water Droplet)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextSecondary)
+                    Text("• ترقية بصرية كبرى لمظهر قطرة الماء (3D Liquid Glass) مع انكسار بصري، ظلال ملامسة للشاشة، بؤرة ضوء كاوية (Caustic Glow)، ولمعان شمس هلالي دقيق.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• استعادة قطرة اللمس المركزية التي تتبخر سريعاً عند النقر بالتزامن مع انتشار التموجات (نفس ميزة شاشات سامسونج الأصلية المحبوبة).", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• مفتاح تحكم مخصص في الإعدادات لتشغيل أو إيقاف انزلاق الماء عند تحريك الهاتف (Tilt Motion Toggle).", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• فيزياء انزلاق لزجة وهادئة جداً مع الجاذبية تحاكي التوتر السطحي للماء على زجاج الهاتف بدون أي هبوط سريع أو سقوط مفاجئ.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• تضخم وسحب قطرة الماء عند الضغط المطول، مع أثر رطوبة متوهج يتبخر تدريجياً.", fontSize = 13.sp, color = MaterialTextPrimary)
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0x1F000000))
+                    Spacer(modifier = Modifier.height(12.dp))
+
                     // v3.5
-                    Text("v3.5 (Water Droplet & Gravity Edition - الإصدار الأحدث)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("v3.5 (مستقر)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextSecondary)
                     Text("• إضافة خيار قطرة الماء الحقيقية (Water Droplet) بمظهر زجاجي سائل ثلاثي الأبعاد يبدو كالماء الحقيقي تماماً.", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• تضخم ونمو قطرة الماء بشكل طبيعي وانسيابي عند الاستمرار بالضغط على الشاشة (Press & Hold).", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• دعم كامل لمستشعر الميلان والجاذبية (Accelerometer): تنزلق قطرات الماء تلقائياً باتجاه ميلان الهاتف (يمين، يسار، أعلى، أسفل) وتترك أثراً مائياً رطباً يتبخر تدريجياً.", fontSize = 13.sp, color = MaterialTextPrimary)

@@ -128,6 +128,7 @@ fun HomeScreen(
         soundEnabled = config.soundEffectsEnabled,
         rippleEnabled = config.touchRippleEnabled,
         waterEffectMode = config.waterEffectMode,
+        waterTiltGravityEnabled = config.waterTiltGravityEnabled,
         soundProfile = config.waterSoundProfile,
         soundVolume = config.waterSoundVolume,
         modifier = modifier
@@ -176,7 +177,8 @@ fun HomeScreen(
                         },
                         onVoiceClick = {
                             AppManager.openWebSearch(context)
-                        }
+                        },
+                        liquidGlassTheme = config.liquidGlassTheme
                     )
                 }
 
@@ -199,7 +201,8 @@ fun HomeScreen(
                     LollipopClockWidget(
                         onClockClick = {
                             AppManager.openClock(context)
-                        }
+                        },
+                        liquidGlassTheme = config.liquidGlassTheme
                     )
                 } else {
                     Spacer(modifier = Modifier.height(10.dp))
@@ -302,7 +305,8 @@ fun HomeScreen(
                         viewModel.openDrawer()
                     },
                     iconPack = config.iconPack,
-                    iconSize = (config.iconSizeDp - 6).dp
+                    iconSize = (config.iconSizeDp - 6).dp,
+                    liquidGlassTheme = config.liquidGlassTheme
                 )
             }
         }
@@ -344,7 +348,8 @@ fun HomeScreen(
             columns = config.gridColumns,
             iconSize = (config.iconSizeDp - 4).dp,
             showLabels = config.showAppLabels,
-            isDarkTheme = !config.nostalgiaMode
+            isDarkTheme = !config.nostalgiaMode,
+            liquidGlassTheme = config.liquidGlassTheme
         )
 
         // 4. Long-Press App Context Menu

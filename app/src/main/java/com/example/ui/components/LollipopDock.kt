@@ -3,8 +3,10 @@ package com.example.ui.components
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
@@ -34,7 +38,7 @@ import com.example.model.IconPackStyle
 import com.example.util.LollipopSoundEffects
 
 /**
- * Authentic Android 5.0 Lollipop Bottom Dock.
+ * Android 5.0 Lollipop Bottom Dock with optional modern Liquid Glass styling.
  * Displays favorite apps alongside the iconic 6-dot circular App Drawer button in the center.
  */
 @Composable
@@ -45,16 +49,49 @@ fun LollipopDock(
     onOpenDrawerClick: () -> Unit,
     modifier: Modifier = Modifier,
     iconPack: IconPackStyle = IconPackStyle.ANDROID_5_ROUND,
-    iconSize: Dp = 50.dp
+    iconSize: Dp = 50.dp,
+    liquidGlassTheme: Boolean = false
 ) {
-    // Dock background: subtle translucent material shelf
-    Box(
-        modifier = modifier
+    val dockShape = if (liquidGlassTheme) RoundedCornerShape(32.dp) else RoundedCornerShape(0.dp)
+    val dockModifier = if (liquidGlassTheme) {
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .height(78.dp)
+            .clip(dockShape)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0x55FFFFFF),
+                        Color(0x22FFFFFF)
+                    )
+                )
+            )
+            .border(
+                border = BorderStroke(
+                    1.2.dp,
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0x99FFFFFF),
+                            Color(0x33FFFFFF)
+                        )
+                    )
+                ),
+                shape = dockShape
+            )
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .testTag("lollipop_dock")
+    } else {
+        modifier
             .fillMaxWidth()
             .height(84.dp)
             .background(Color(0x28000000))
             .padding(horizontal = 16.dp, vertical = 6.dp)
-            .testTag("lollipop_dock"),
+            .testTag("lollipop_dock")
+    }
+
+    Box(
+        modifier = dockModifier,
         contentAlignment = Alignment.Center
     ) {
         Row(

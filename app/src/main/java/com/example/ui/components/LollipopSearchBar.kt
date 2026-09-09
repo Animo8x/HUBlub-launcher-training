@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
@@ -35,22 +37,31 @@ import com.example.ui.theme.MaterialCardWhite
 import com.example.util.LollipopSoundEffects
 
 /**
- * Classic Android 5.0 Lollipop Google Search bar card.
+ * Android 5.0 Google Quick Search bar card with optional modern Liquid Glass styling.
  * Sits at the top of the Home screen with authentic typography, subtle elevation and microphone icon.
  */
 @Composable
 fun LollipopSearchBar(
     onSearchClick: () -> Unit,
     onVoiceClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    liquidGlassTheme: Boolean = false
 ) {
+    val barShape = if (liquidGlassTheme) RoundedCornerShape(26.dp) else RoundedCornerShape(4.dp)
+    val barColor = if (liquidGlassTheme) Color(0x40FFFFFF) else MaterialCardWhite
+    val barBorder = if (liquidGlassTheme) BorderStroke(1.2.dp, Color(0x80FFFFFF)) else null
+
     Card(
-        shape = RoundedCornerShape(4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialCardWhite),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+        shape = barShape,
+        colors = CardDefaults.cardColors(containerColor = barColor),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (liquidGlassTheme) 0.dp else 2.dp,
+            pressedElevation = 4.dp
+        ),
+        border = barBorder,
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(if (liquidGlassTheme) 52.dp else 48.dp)
             .padding(horizontal = 12.dp)
             .testTag("lollipop_search_bar")
             .clickable {
