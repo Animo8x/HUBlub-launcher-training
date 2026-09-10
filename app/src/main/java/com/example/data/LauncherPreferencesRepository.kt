@@ -49,6 +49,7 @@ class LauncherPreferencesRepository(context: Context) {
                     WallpaperPreset.STOCK_LOLLIPOP
                 },
                 customWallpaperUri = if (customUri.isNullOrBlank()) null else customUri,
+                isVideoWallpaper = json.optBoolean("isVideoWallpaper", false),
                 iconPack = try {
                     IconPackStyle.valueOf(json.optString("iconPack", IconPackStyle.ANDROID_5_ROUND.name))
                 } catch (e: Exception) {
@@ -93,6 +94,7 @@ class LauncherPreferencesRepository(context: Context) {
             put("showGoogleSearchBar", config.showGoogleSearchBar)
             put("wallpaperPreset", config.wallpaperPreset.name)
             if (config.customWallpaperUri != null) put("customWallpaperUri", config.customWallpaperUri)
+            put("isVideoWallpaper", config.isVideoWallpaper)
             put("iconPack", config.iconPack.name)
             put("drawerStyle", config.drawerStyle.name)
             put("performanceMode", config.performanceMode)
@@ -239,6 +241,7 @@ class LauncherPreferencesRepository(context: Context) {
                         author = item.optString("author", "أنا"),
                         description = item.optString("description", ""),
                         imageUri = item.optString("imageUri", null),
+                        isVideo = item.optBoolean("isVideo", false),
                         preset = preset,
                         colorHex = item.optLong("colorHex", 0xFF009688),
                         likesCount = item.optInt("likesCount", 0),
@@ -259,6 +262,7 @@ class LauncherPreferencesRepository(context: Context) {
                 put("author", w.author)
                 put("description", w.description)
                 if (w.imageUri != null) put("imageUri", w.imageUri)
+                put("isVideo", w.isVideo)
                 if (w.preset != null) put("preset", w.preset.name)
                 put("colorHex", w.colorHex)
                 put("likesCount", w.likesCount)

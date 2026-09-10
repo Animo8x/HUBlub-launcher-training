@@ -135,10 +135,11 @@ fun HomeScreen(
             .fillMaxSize()
             .testTag("home_screen_root")
     ) {
-        // 1. Authentic Android 5.0 Wallpaper
+        // 1. Authentic Android 5.0 Wallpaper or Live/Video Wallpaper
         LollipopWallpaper(
             preset = config.wallpaperPreset,
-            customUri = config.customWallpaperUri
+            customUri = config.customWallpaperUri,
+            isVideo = config.isVideoWallpaper
         )
 
         // 2. Desktop Home Layer with Swipe-Up gesture to open App Drawer
@@ -410,14 +411,14 @@ fun HomeScreen(
                     viewModel.openWidgetPicker()
                 },
                 communityWallpapers = communityWallpapers,
-                onPublishWallpaper = { title, author, desc, preset, uri ->
-                    viewModel.publishCommunityWallpaper(title, author, desc, preset, uri)
+                onPublishWallpaper = { title, author, desc, preset, uri, isVideo ->
+                    viewModel.publishCommunityWallpaper(title, author, desc, preset, uri, isVideo)
                 },
                 onDeleteWallpaper = { id ->
                     viewModel.deleteCommunityWallpaper(id)
                 },
-                onApplyWallpaper = { preset, uri ->
-                    viewModel.applyWallpaper(preset, uri)
+                onApplyWallpaper = { preset, uri, isVideo ->
+                    viewModel.applyWallpaper(preset, uri, isVideo)
                 },
                 onClose = { viewModel.closeThemesApp() }
             )

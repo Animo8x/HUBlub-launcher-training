@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ColorLens
@@ -39,10 +40,13 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FormatPaint
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -95,15 +99,16 @@ fun LollipopThemesDialog(
     onConfigChange: (LauncherConfig) -> Unit,
     onOpenWidgetPicker: () -> Unit,
     communityWallpapers: List<CommunityWallpaper> = emptyList(),
-    onPublishWallpaper: (String, String, String, WallpaperPreset?, String?) -> Unit = { _, _, _, _, _ -> },
+    onPublishWallpaper: (String, String, String, WallpaperPreset?, String?, Boolean) -> Unit = { _, _, _, _, _, _ -> },
     onDeleteWallpaper: (String) -> Unit = {},
-    onApplyWallpaper: (WallpaperPreset?, String?) -> Unit = { _, _ -> },
+    onApplyWallpaper: (WallpaperPreset?, String?, Boolean) -> Unit = { _, _, _ -> },
     onClose: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf(
-        "خلفيات الشاشة (Wallpapers)",
-        "خلفيات من جهازي (My Wallpapers)",
+        "خلفيات متحركة (Live Wallpapers)",
+        "خلفيات ثابتة (Wallpapers)",
+        "خلفيات وفيديوهات جهازي (My Media)",
         "حزم الأيقونات (5 Packs)",
         "مظهر الدرج والشفافية (Drawer Style)",
         "الودجات (Widgets)"
@@ -205,10 +210,11 @@ fun LollipopThemesDialog(
                             },
                             icon = {
                                 val icon = when (index) {
-                                    0 -> Icons.Default.Image
-                                    1 -> Icons.Default.Share
-                                    2 -> Icons.Default.Palette
-                                    3 -> Icons.Default.Opacity
+                                    0 -> Icons.Default.PlayCircle
+                                    1 -> Icons.Default.Image
+                                    2 -> Icons.Default.VideoLibrary
+                                    3 -> Icons.Default.Palette
+                                    4 -> Icons.Default.Opacity
                                     else -> Icons.Default.Widgets
                                 }
                                 Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -224,48 +230,358 @@ fun LollipopThemesDialog(
                         .weight(1f)
                 ) {
                     when (selectedTab) {
-                        0 -> WallpapersSection(
+                        0 -> LiveWallpapersSection(
+                            currentPreset = config.wallpaperPreset,
+                            currentCustomUri = config.customWallpaperUri,
+                            isVideo = config.isVideoWallpaper,
+                            onSelectPreset = { preset ->
+                                LollipopSoundEffects.playWaterDrop()
+                                onConfigChange(
+                                    config.copy(
+                                        wallpaperPreset = preset,
+                                        customWallpaperUri = null,
+                                        isVideoWallpaper = false
+                                    )
+                                )
+                            },
+                            onPickVideoSuccess = { uri ->
+                                LollipopSoundEffects.playButtonClick()
+                                onPublishWallpaper("فيديو خلفية متحرك", "", "خلفية فيديو متكررة", null, uri, true)
+                                onApplyWallpaper(null, uri, true)
+                            }
+                        )
+                        1 -> WallpapersSection(
                             currentPreset = config.wallpaperPreset,
                             onSelect = { preset ->
                                 LollipopSoundEffects.playWaterDrop()
-                                onConfigChange(config.copy(wallpaperPreset = preset, customWallpaperUri = null))
+                                onConfigChange(
+                                    config.copy(
+                                        wallpaperPreset = preset,
+                                        customWallpaperUri = null,
+                                        isVideoWallpaper = false
+                                    )
+                                )
                             }
                         )
-                        1 -> MyWallpapersSection(
+                        2 -> MyWallpapersSection(
                             communityWallpapers = communityWallpapers,
                             currentPreset = config.wallpaperPreset,
                             currentCustomUri = config.customWallpaperUri,
-                            onPublish = { title, uri ->
-                                onPublishWallpaper(title, "", "", null, uri)
+                            currentIsVideo = config.isVideoWallpaper,
+                            onPublish = { title, uri, isVideo ->
+                                onPublishWallpaper(title, "", "", null, uri, isVideo)
                             },
                             onDelete = { id ->
                                 onDeleteWallpaper(id)
                             },
-                            onApply = { preset, uri ->
+                            onApply = { preset, uri, isVideo ->
                                 LollipopSoundEffects.playButtonClick()
-                                onApplyWallpaper(preset, uri)
+                                onApplyWallpaper(preset, uri, isVideo)
                             }
                         )
-                        2 -> IconPacksSection(
+                        3 -> IconPacksSection(
                             currentIconPack = config.iconPack,
                             onSelect = { pack ->
                                 LollipopSoundEffects.playWaterDrop()
                                 onConfigChange(config.copy(iconPack = pack))
                             }
                         )
-                        3 -> TransparencySection(
+                        4 -> TransparencySection(
                             currentStyle = config.drawerStyle,
                             onSelect = { style ->
                                 LollipopSoundEffects.playWaterDrop()
                                 onConfigChange(config.copy(drawerStyle = style))
                             }
                         )
-                        4 -> WidgetsSection(
+                        5 -> WidgetsSection(
                             onAddWidgetClick = {
                                 LollipopSoundEffects.playWaterDrop()
                                 onOpenWidgetPicker()
                             }
                         )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Live Wallpapers Tab (خلفيات متحركة):
+ * 5 built-in authentic animated wallpapers that continuously loop and morph:
+ * 1. LIVE_COLOR_MORPH: تغير ألوان تدريجياً
+ * 2. LIVE_FLOATING_SQUARES: مربعات زجاجية شفافة متحركة
+ * 3. LIVE_FLOATING_CIRCLES: دوائر وفقاعات ضوئية متحركة
+ * 4. LIVE_GEOMETRIC_SHAPES: أشكال هندسية شفافة متحركة
+ * 5. LIVE_COSMIC_GRID_WAVE: مصفوفة نيون وموجات هندسية
+ * Plus the ability to pick any video from device storage as a looping live wallpaper.
+ */
+@Composable
+private fun LiveWallpapersSection(
+    currentPreset: WallpaperPreset,
+    currentCustomUri: String?,
+    isVideo: Boolean,
+    onSelectPreset: (WallpaperPreset) -> Unit,
+    onPickVideoSuccess: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val videoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: Exception) {}
+            onPickVideoSuccess(uri.toString())
+        }
+    }
+
+    val liveWallpapers = listOf(
+        Triple(
+            WallpaperPreset.LIVE_COLOR_MORPH,
+            "1. تغير ألوان تدريجياً (Liquid Color Morph)",
+            "تدرجات ألوان نابضة بالحياة تتغير وتتحول تدريجياً وسلسة في حلقة متكررة ودائمة."
+        ),
+        Triple(
+            WallpaperPreset.LIVE_FLOATING_SQUARES,
+            "2. مربعات شفافة متطايرة (Floating Glass Squares)",
+            "مربعات زجاجية شفافة تطفو وتدور وتسبح في الفضاء وتنعاد وتتكرر بشكل انسيابي دائم."
+        ),
+        Triple(
+            WallpaperPreset.LIVE_FLOATING_CIRCLES,
+            "3. دوائر وفقاعات ضوئية (Floating Bubbles & Circles)",
+            "دوائر وكرات ضوئية شفافة تصعد وتتماوج وتتكرر بسلاسة متناهية وأجواء مائية هادئة."
+        ),
+        Triple(
+            WallpaperPreset.LIVE_GEOMETRIC_SHAPES,
+            "4. أشكال هندسية شفافة (Geometric Polyhedra)",
+            "مثلثات ومعينات وسداسيات كريستالية شفافة متحركة وتنعاد وتضل تكرر بشكل متناسق."
+        ),
+        Triple(
+            WallpaperPreset.LIVE_COSMIC_GRID_WAVE,
+            "5. مصفوفة نيون وموجات هندسية (Cosmic Wave Matrix)",
+            "موجات هندسية متتالية وأشرطة ليزرية مع شبكة رقمية متكررة بإيقاع رقمي انسيابي."
+        )
+    )
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        // Video live wallpaper launcher card
+        item {
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A237E)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "وضع أي فيديو كخلفية متحركة",
+                                    color = Color.White,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = LollipopAmber500
+                                ) {
+                                    Text(
+                                        text = "فيديو 🎥",
+                                        color = Color(0xFF212121),
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = "اختر أي فيديو من ذاكرة هاتفك وسيعمل في حلقة متكررة هادئة على شاشتك الرئيسية!",
+                                color = Color(0xDDFFFFFF),
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Button(
+                            onClick = {
+                                LollipopSoundEffects.playButtonClick()
+                                videoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E5FF)),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Movie,
+                                contentDescription = null,
+                                tint = Color(0xFF0A192F),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "اختيار فيديو",
+                                color = Color(0xFF0A192F),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    if (isVideo && !currentCustomUri.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0x3300E5FF),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayCircle,
+                                    contentDescription = null,
+                                    tint = Color(0xFF00E5FF),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "الخلفية الحالية: فيديو مخصص من جهازك يعمل الآن ✓",
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        items(liveWallpapers) { (preset, title, desc) ->
+            val isCurrent = (currentPreset == preset && currentCustomUri.isNullOrBlank() && !isVideo)
+
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialCardWhite),
+                elevation = CardDefaults.cardElevation(if (isCurrent) 4.dp else 1.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = if (isCurrent) 2.dp else 0.dp,
+                        color = if (isCurrent) LollipopTeal500 else Color.Transparent,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp)
+                            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                    ) {
+                        LollipopWallpaper(preset = preset)
+
+                        Surface(
+                            shape = RoundedCornerShape(bottomStart = 8.dp),
+                            color = Color(0xCC000000),
+                            modifier = Modifier.align(Alignment.TopEnd)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = null,
+                                    tint = LollipopAmber500,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "متحركة LIVE",
+                                    color = Color.White,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        if (isCurrent) {
+                            Surface(
+                                shape = RoundedCornerShape(bottomEnd = 8.dp),
+                                color = LollipopTeal500,
+                                modifier = Modifier.align(Alignment.TopStart)
+                            ) {
+                                Text(
+                                    text = "الخلفية الحالية ✓",
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = title,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF263238)
+                            )
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = desc,
+                                fontSize = 12.sp,
+                                color = Color(0xFF78909C),
+                                maxLines = 2
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Button(
+                            onClick = {
+                                LollipopSoundEffects.playButtonClick()
+                                onSelectPreset(preset)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isCurrent) LollipopTeal700 else LollipopTeal500
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(if (isCurrent) "مفعلة ✓" else "تطبيق")
+                        }
                     }
                 }
             }
@@ -454,13 +770,15 @@ private fun MyWallpapersSection(
     communityWallpapers: List<CommunityWallpaper>,
     currentPreset: WallpaperPreset,
     currentCustomUri: String?,
-    onPublish: (String, String) -> Unit,
+    currentIsVideo: Boolean,
+    onPublish: (String, String, Boolean) -> Unit,
     onDelete: (String) -> Unit,
-    onApply: (WallpaperPreset?, String?) -> Unit
+    onApply: (WallpaperPreset?, String?, Boolean) -> Unit
 ) {
     val context = LocalContext.current
     var showSaveDialog by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<String?>(null) }
+    var isVideoSelected by remember { mutableStateOf(false) }
     var titleInput by remember { mutableStateOf("") }
     var descInput by remember { mutableStateOf("") }
 
@@ -477,8 +795,29 @@ private fun MyWallpapersSection(
                 // Some providers might not support persistable URIs
             }
             selectedImageUri = uri.toString()
+            isVideoSelected = false
             titleInput = "خلفية مخصصة ${communityWallpapers.size + 1}"
             descInput = "صورة من ذاكرة الهاتف"
+            showSaveDialog = true
+        }
+    }
+
+    val videoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: Exception) {
+                // Some providers might not support persistable URIs
+            }
+            selectedImageUri = uri.toString()
+            isVideoSelected = true
+            titleInput = "فيديو متحرك ${communityWallpapers.size + 1}"
+            descInput = "خلفية فيديو متكررة من ذاكرة الهاتف"
             showSaveDialog = true
         }
     }
@@ -489,7 +828,7 @@ private fun MyWallpapersSection(
             onDismissRequest = { showSaveDialog = false },
             title = {
                 Text(
-                    text = "حفظ وتطبيق الخلفية من ملفاتك",
+                    text = if (isVideoSelected) "حفظ وتطبيق فيديو كخلفية متحركة" else "حفظ وتطبيق الخلفية من ملفاتك",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
@@ -505,12 +844,19 @@ private fun MyWallpapersSection(
                             .height(140.dp)
                             .clip(RoundedCornerShape(8.dp))
                     ) {
-                        AsyncImage(
-                            model = uriStr,
-                            contentDescription = "معاينة الخلفية",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        if (isVideoSelected) {
+                            VideoLiveWallpaper(
+                                videoUri = uriStr,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            AsyncImage(
+                                model = uriStr,
+                                contentDescription = "معاينة الخلفية",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
 
                     OutlinedTextField(
@@ -533,9 +879,10 @@ private fun MyWallpapersSection(
             confirmButton = {
                 Button(
                     onClick = {
-                        val title = titleInput.ifBlank { "خلفية من جهازي" }
-                        onPublish(title, uriStr)
-                        onApply(null, uriStr)
+                        val defaultTitle = if (isVideoSelected) "فيديو من جهازي" else "خلفية من جهازي"
+                        val title = titleInput.ifBlank { defaultTitle }
+                        onPublish(title, uriStr, isVideoSelected)
+                        onApply(null, uriStr, isVideoSelected)
                         showSaveDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = LollipopTeal500)
@@ -547,8 +894,9 @@ private fun MyWallpapersSection(
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     OutlinedButton(
                         onClick = {
-                            val title = titleInput.ifBlank { "خلفية من جهازي" }
-                            onPublish(title, uriStr)
+                            val defaultTitle = if (isVideoSelected) "فيديو من جهازي" else "خلفية من جهازي"
+                            val title = titleInput.ifBlank { defaultTitle }
+                            onPublish(title, uriStr, isVideoSelected)
                             showSaveDialog = false
                         }
                     ) {
@@ -567,61 +915,88 @@ private fun MyWallpapersSection(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Button to pick image from device
+        // Buttons to pick image or video from device
         item {
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = LollipopTeal700),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(16.dp)
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "اختيار صورة كخلفية من ملفات الجهاز",
-                            color = Color.White,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(3.dp))
-                        Text(
-                            text = "اختر صورة حقيقية من معرض الصور، عاينها، واحفظها في قائمتك",
-                            color = Color(0xDDFFFFFF),
-                            fontSize = 12.sp
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Button(
-                        onClick = {
-                            LollipopSoundEffects.playButtonClick()
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = LollipopAmber500),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                    Text(
+                        text = "إضافة وسائط وخلفيات من ملفات هاتفك",
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = "اختر صورة عادية أو مقطع فيديو ليعمل كخلفية متحركة متكررة بدون صوت.",
+                        color = Color(0xDDFFFFFF),
+                        fontSize = 12.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            tint = Color(0xFF212121),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "اختيار صورة",
-                            color = Color(0xFF212121),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Button(
+                            onClick = {
+                                LollipopSoundEffects.playButtonClick()
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = LollipopAmber500),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Image,
+                                contentDescription = null,
+                                tint = Color(0xFF212121),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "اختيار صورة",
+                                color = Color(0xFF212121),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                LollipopSoundEffects.playButtonClick()
+                                videoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E5FF)),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Movie,
+                                contentDescription = null,
+                                tint = Color(0xFF0A192F),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "اختيار فيديو 🎥",
+                                color = Color(0xFF0A192F),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
@@ -637,21 +1012,21 @@ private fun MyWallpapersSection(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
-                            imageVector = Icons.Default.Image,
+                            imageVector = Icons.Default.VideoLibrary,
                             contentDescription = null,
                             tint = Color(0xFF90A4AE),
                             modifier = Modifier.size(48.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "لم تقم بإضافة أي خلفية مخصصة بعد.",
+                            text = "لم تقم بإضافة أي خلفية أو فيديو مخصص بعد.",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color(0xFF455A64)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "اضغط على زر \"اختيار صورة\" أعلاه لاختيار صورة من هاتفك وتطبيقها.",
+                            text = "اضغط على زر \"اختيار صورة\" أو \"اختيار فيديو\" أعلاه لإضافتها وتطبيقها مباشرة.",
                             fontSize = 12.sp,
                             color = Color(0xFF78909C)
                         )
@@ -660,8 +1035,8 @@ private fun MyWallpapersSection(
             }
         } else {
             items(communityWallpapers) { item ->
-                val isCurrent = (item.imageUri != null && item.imageUri == currentCustomUri) ||
-                        (item.imageUri == null && item.preset != null && item.preset == currentPreset)
+                val isCurrent = (item.imageUri != null && item.imageUri == currentCustomUri && item.isVideo == currentIsVideo) ||
+                        (item.imageUri == null && item.preset != null && item.preset == currentPreset && !currentIsVideo)
 
                 Card(
                     shape = RoundedCornerShape(12.dp),
@@ -683,12 +1058,43 @@ private fun MyWallpapersSection(
                                 .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
                         ) {
                             if (item.imageUri != null) {
-                                AsyncImage(
-                                    model = item.imageUri,
-                                    contentDescription = item.title,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
+                                if (item.isVideo) {
+                                    VideoLiveWallpaper(
+                                        videoUri = item.imageUri,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    Surface(
+                                        shape = RoundedCornerShape(bottomStart = 8.dp),
+                                        color = Color(0xCC0A192F),
+                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Movie,
+                                                contentDescription = null,
+                                                tint = Color(0xFF00E5FF),
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(3.dp))
+                                            Text(
+                                                text = "فيديو متحرك 🎥",
+                                                color = Color.White,
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    AsyncImage(
+                                        model = item.imageUri,
+                                        contentDescription = item.title,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
                             } else if (item.preset != null) {
                                 LollipopWallpaper(preset = item.preset)
                             } else {
@@ -704,7 +1110,7 @@ private fun MyWallpapersSection(
                                     shape = RoundedCornerShape(12.dp),
                                     color = LollipopTeal500,
                                     modifier = Modifier
-                                        .align(Alignment.TopEnd)
+                                        .align(Alignment.TopStart)
                                         .padding(8.dp)
                                 ) {
                                     Text(
@@ -764,7 +1170,7 @@ private fun MyWallpapersSection(
                                 Button(
                                     onClick = {
                                         LollipopSoundEffects.playButtonClick()
-                                        onApply(item.preset, item.imageUri)
+                                        onApply(item.preset, item.imageUri, item.isVideo)
                                     },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = if (isCurrent) LollipopTeal700 else LollipopTeal500

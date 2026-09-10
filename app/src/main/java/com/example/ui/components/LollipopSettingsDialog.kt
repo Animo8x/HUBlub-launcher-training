@@ -330,7 +330,7 @@ fun LollipopSettingsDialog(
                             Triple(
                                 WaterEffectMode.GALAXY_RIPPLE,
                                 "تموجات ماء سامسونج الكلاسيكية (Galaxy Ripple) ★ الافتراضي",
-                                "موجات دائرية متتالية كلاسيكية تحاكي شاشات سامسونج القديمة مع قطرة لمس مركزية متبخرة"
+                                "موجات دائرية مائية متتالية نقية وسلسة تحاكي شاشات سامسونج القديمة الأصلية بدقة"
                             ),
                             Triple(
                                 WaterEffectMode.WATER_DROPLET,
@@ -616,9 +616,9 @@ fun LollipopSettingsDialog(
 
                     // About
                     SectionHeader("ABOUT HUBLUB LAUNCHER")
-                    Text("HUBlub Launcher v4.1 (Liquid Glass & Interactive Particles Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
+                    Text("HUBlub Launcher v5.0 (Live Wallpapers & Video Backgrounds Edition)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextPrimary)
                     Text(
-                        "An authentic Launcher experience with Liquid Glass theme, physical 3D water droplets, stationary evaporation without tilt slide, classic Samsung Galaxy Nature ripples, and interactive particles.",
+                        "An authentic Launcher experience with 5 smooth looping live wallpapers, custom video wallpapers, classic Samsung Galaxy Nature ripples, Liquid Glass theme, and interactive particles.",
                         fontSize = 12.sp,
                         color = MaterialTextSecondary,
                         modifier = Modifier.padding(top = 2.dp)
@@ -716,8 +716,20 @@ fun LollipopSettingsDialog(
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
+                    // v5.0
+                    Text("v5.0 (Live Wallpapers & Video Backgrounds - الإصدار الأحدث)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("• 5 خلفيات متحركة مدمجة وجاهزة: تدرج الألوان الانسيابي (Color Morph)، المربعات العائمة الشفافة (Floating Squares)، الدوائر والفقاعات الضوئية (Floating Bubbles)، الأشكال الهندسية المتكررة (Geometric Shapes)، ومصفوفة النيون والموجات الفضائية (Cosmic Matrix Wave).", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• دعم كامل لخلفيات الفيديو: إمكانية اختيار أي مقطع فيديو من ملفات الهاتف وتشغيله كخلفية متكررة دائمة وبدون صوت (Looping Silent Video Wallpaper).", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• قسم متكامل للخلفيات المتحركة داخل نافذة الثيمات، مع معاينة حية سلسة وخفيفة للأداء واستهلاك البطارية.", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• إمكانية حفظ وإدارة ونشر كل من الصور والفيديوهات ضمن قسم \"خلفياتي / خلفيات مخصصة\".", fontSize = 13.sp, color = MaterialTextPrimary)
+                    Text("• الحفاظ الكامل على تموجات ماء جالاكسي الطبيعية الكلاسيكية (Galaxy Ripple) وصوت الطبيعة المائي الكلاسيكي.", fontSize = 13.sp, color = MaterialTextPrimary)
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0x1F000000))
+                    Spacer(modifier = Modifier.height(12.dp))
+
                     // v4.1
-                    Text("v4.1 (Liquid Glass & New Interactive Effects - الإصدار الأحدث)", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = LollipopTeal700)
+                    Text("v4.1 (Liquid Glass & New Interactive Effects)", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTextSecondary)
                     Text("• تفعيل النمط القديم (تموجات سامسونج الكلاسيكية) كخيار افتراضي عند أول تشغيل للتطبيق مع إمكانية التغيير من الإعدادات.", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• ثبات قطرات الماء في مكانها وتبخرها تدريجياً وبهدوء عند إيقاف وضع الانزلاق (Tilt Motion) دون أي انزلاق لأسفل الشاشة.", fontSize = 13.sp, color = MaterialTextPrimary)
                     Text("• تحسين مظهر قطرة الماء لتكون شبه شفافة وواضحة الرؤية مع الحفاظ على الانكسار البصري المتقن.", fontSize = 13.sp, color = MaterialTextPrimary)

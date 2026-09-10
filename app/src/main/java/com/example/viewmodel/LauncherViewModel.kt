@@ -412,14 +412,22 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     )
     val communityWallpapers: StateFlow<List<CommunityWallpaper>> = _communityWallpapers.asStateFlow()
 
-    fun publishCommunityWallpaper(title: String, author: String, description: String, preset: WallpaperPreset?, uri: String? = null) {
+    fun publishCommunityWallpaper(
+        title: String,
+        author: String,
+        description: String,
+        preset: WallpaperPreset?,
+        uri: String? = null,
+        isVideo: Boolean = false
+    ) {
         val newWallpaper = CommunityWallpaper(
             id = "comm_${System.currentTimeMillis()}",
-            title = title.ifBlank { "خلفية من ملفات جهازي" },
+            title = title.ifBlank { if (isVideo) "فيديو متحرك من جهازي" else "خلفية من ملفات جهازي" },
             author = author.ifBlank { "أنا" },
-            description = description.ifBlank { "صورة مخصصة تم اختيارها من ذاكرة الهاتف." },
+            description = description.ifBlank { if (isVideo) "خلفية فيديو متكررة من ذاكرة الهاتف." else "صورة مخصصة تم اختيارها من ذاكرة الهاتف." },
             preset = preset,
             imageUri = uri,
+            isVideo = isVideo,
             colorHex = 0xFF009688,
             likesCount = 0
         )
@@ -435,11 +443,11 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         repository.saveCommunityWallpapers(current)
     }
 
-    fun applyWallpaper(preset: WallpaperPreset?, customUri: String? = null) {
+    fun applyWallpaper(preset: WallpaperPreset?, customUri: String? = null, isVideo: Boolean = false) {
         val updated = if (customUri != null) {
-            _config.value.copy(customWallpaperUri = customUri)
+            _config.value.copy(customWallpaperUri = customUri, isVideoWallpaper = isVideo)
         } else if (preset != null) {
-            _config.value.copy(wallpaperPreset = preset, customWallpaperUri = null)
+            _config.value.copy(wallpaperPreset = preset, customWallpaperUri = null, isVideoWallpaper = false)
         } else {
             _config.value
         }

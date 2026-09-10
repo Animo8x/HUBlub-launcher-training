@@ -34,6 +34,11 @@ data class HomeShortcut(
 enum class WallpaperPreset(val title: String) {
     STOCK_LOLLIPOP("القديمة (الأصلية): أندرويد 5.0 الرسمية (Nexus 5 Paper)"),
     PURPLE_DEEP_BLUE("أندرويد 5: بنفسجي وأزرق غامق (Material Purple & Blue)"),
+    LIVE_COLOR_MORPH("خلفية حية 1: تدرج ألوان سائل وانسيابي (Liquid Color Morph)"),
+    LIVE_FLOATING_SQUARES("خلفية حية 2: مربعات زجاجية شفافة متطايرة (Floating Glass Squares)"),
+    LIVE_FLOATING_CIRCLES("خلفية حية 3: دوائر وفقاعات ضوئية متحركة (Floating Bubbles & Circles)"),
+    LIVE_GEOMETRIC_SHAPES("خلفية حية 4: أشكال هندسية شفافة متكررة (Geometric Polyhedra)"),
+    LIVE_COSMIC_GRID_WAVE("خلفية حية 5: شبكة نيون وموجات كوزميك (Cosmic Wave Matrix)"),
     MODERN_16_AURA("أندرويد 16: هالة ضوئية متدرجة (Luminous Aura)"),
     MODERN_16_FROSTED_GLASS("أندرويد 16: طبقات زجاجية متداخلة (Frosted Glass Layers)"),
     MODERN_17_CYBER_SUNSET("أندرويد 17: شفق الغروب الدافئ (Twilight Sunset)"),
@@ -66,6 +71,7 @@ data class CommunityWallpaper(
     val author: String = "أنا",
     val description: String = "",
     val imageUri: String? = null,
+    val isVideo: Boolean = false,
     val preset: WallpaperPreset? = null,
     val colorHex: Long = 0xFF009688,
     val likesCount: Int = 0,
@@ -129,6 +135,7 @@ data class LauncherConfig(
     val showGoogleSearchBar: Boolean = false, // Google search bar is hidden by default as requested!
     val wallpaperPreset: WallpaperPreset = WallpaperPreset.STOCK_LOLLIPOP,
     val customWallpaperUri: String? = null,
+    val isVideoWallpaper: Boolean = false,
     val iconPack: IconPackStyle = IconPackStyle.ANDROID_5_ROUND,
     val drawerStyle: DrawerStyle = DrawerStyle.CLASSIC_SOLID,
     val liquidGlassTheme: Boolean = false, // Modern Liquid Glass visual theme with rounded curves and frosted glass

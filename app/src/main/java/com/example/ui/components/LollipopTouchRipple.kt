@@ -608,7 +608,7 @@ fun LollipopTouchRippleContainer(
                                     if (rippleEnabled) {
                                         when (waterEffectMode) {
                                             WaterEffectMode.GALAXY_RIPPLE -> {
-                                                // Classic Samsung Galaxy S3/S4 TouchWiz Ripples + Center Impact Droplet
+                                                // Classic pure Samsung Galaxy S3/S4 TouchWiz Ripples
                                                 if (activeRipples.size > 8) activeRipples.removeAt(0)
                                                 activeRipples.add(
                                                     NatureWaterRipple(
@@ -616,22 +616,11 @@ fun LollipopTouchRippleContainer(
                                                         centerX = pos.x,
                                                         centerY = pos.y,
                                                         startTimeNanos = nowNanos,
-                                                        durationMs = 700f,
+                                                        durationMs = 750f,
                                                         maxRadiusPx = splashMaxRadiusPx,
                                                         wavelengthPx = wavelengthPx,
                                                         isDragWake = false,
                                                         intensity = 1.0f
-                                                    )
-                                                )
-                                                if (activeImpactDrops.size > 6) activeImpactDrops.removeAt(0)
-                                                activeImpactDrops.add(
-                                                    ImpactCenterDroplet(
-                                                        id = nextId++,
-                                                        centerX = pos.x,
-                                                        centerY = pos.y,
-                                                        startTimeNanos = nowNanos,
-                                                        durationMs = 650f,
-                                                        initialRadiusPx = initialDropRadiusPx * 0.90f
                                                     )
                                                 )
                                             }
@@ -840,7 +829,6 @@ fun LollipopTouchRippleContainer(
                                             if (rippleEnabled) {
                                                 val nowNanos = System.nanoTime()
                                                 if (waterEffectMode == WaterEffectMode.GALAXY_RIPPLE ||
-                                                    waterEffectMode == WaterEffectMode.WATER_DROPLET ||
                                                     waterEffectMode == WaterEffectMode.HYBRID_BOTH ||
                                                     waterEffectMode == WaterEffectMode.ELECTRIC_AQUA ||
                                                     waterEffectMode == WaterEffectMode.ZEN_SPRING) {
@@ -910,7 +898,6 @@ fun LollipopTouchRippleContainer(
 
                 // A. CONCENTRIC GALAXY NATURE WAVES
                 if (waterEffectMode == WaterEffectMode.GALAXY_RIPPLE ||
-                    waterEffectMode == WaterEffectMode.WATER_DROPLET ||
                     waterEffectMode == WaterEffectMode.HYBRID_BOTH ||
                     waterEffectMode == WaterEffectMode.ELECTRIC_AQUA ||
                     waterEffectMode == WaterEffectMode.ZEN_SPRING) {
@@ -965,8 +952,7 @@ fun LollipopTouchRippleContainer(
                 }
 
                 // B. TRANSIENT IMPACT CENTER DROPLETS
-                if (waterEffectMode == WaterEffectMode.GALAXY_RIPPLE ||
-                    waterEffectMode == WaterEffectMode.WATER_DROPLET ||
+                if (waterEffectMode == WaterEffectMode.WATER_DROPLET ||
                     waterEffectMode == WaterEffectMode.HYBRID_BOTH) {
                     for (impact in activeImpactDrops) {
                         val elapsedMs = (nowNanos - impact.startTimeNanos) / 1_000_000f
