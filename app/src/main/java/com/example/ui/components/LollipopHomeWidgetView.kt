@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.model.HomeWidget
 import com.example.util.LollipopSoundEffects
@@ -59,10 +60,8 @@ fun LollipopHomeWidgetView(
                 AndroidView(
                     factory = { ctx ->
                         try {
-                            appWidgetHost.createView(ctx, widget.appWidgetId, appWidgetInfo).apply {
-                                setAppWidget(widget.appWidgetId, appWidgetInfo)
-                            }
-                        } catch (e: Exception) {
+                            appWidgetHost.createView(ctx, widget.appWidgetId, appWidgetInfo)
+                        } catch (e: Throwable) {
                             AppWidgetHostView(ctx)
                         }
                     },
@@ -95,6 +94,44 @@ fun LollipopHomeWidgetView(
                             modifier = Modifier.size(16.dp)
                         )
                     }
+                }
+            }
+        }
+    } else {
+        // Fallback card if widget provider is no longer available on device
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0x40000000)),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 4.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                androidx.compose.material3.Text(
+                    text = "الودجت: ${widget.label} (غير متوفر أو يحتاج إعادة ضبط)",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 12.sp,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
+                IconButton(
+                    onClick = {
+                        LollipopSoundEffects.playButtonClick()
+                        onRemove()
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .size(26.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Remove Widget",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
         }

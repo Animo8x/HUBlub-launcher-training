@@ -364,6 +364,31 @@ private fun LiveWallpapersSection(
             WallpaperPreset.LIVE_COSMIC_GRID_WAVE,
             "5. مصفوفة نيون وموجات هندسية (Cosmic Wave Matrix)",
             "موجات هندسية متتالية وأشرطة ليزرية مع شبكة رقمية متكررة بإيقاع رقمي انسيابي."
+        ),
+        Triple(
+            WallpaperPreset.LIVE_FALLING_RAIN_DROPS,
+            "6. قطرات مطر وندى متساقطة (Gentle Rain Drops)",
+            "قطرات مائية رقيقة تتساقط بانسيابية مع حلقات تموجية ناعمة على صفحة الماء الهادئ."
+        ),
+        Triple(
+            WallpaperPreset.LIVE_AURORA_BOREALIS,
+            "7. شفق قطبي أورورا ناعم (Aurora Borealis Ribbon)",
+            "ستائر ضوئية زمردية وبنفسجية متماوجة تتحرك بنعومة عبر ليل قطبي ساحر."
+        ),
+        Triple(
+            WallpaperPreset.LIVE_STARLIGHT_GALAXY,
+            "8. بريق نجوم وجزيئات فضائية (Starlight & Dust)",
+            "غبار كوني متلألئ وبريق نجوم ماسية تومض وتسبح في الفضاء الكوني اللانهائي."
+        ),
+        Triple(
+            WallpaperPreset.LIVE_CYBER_HEX_GRID,
+            "9. خلايا نيون سداسية نابضة (Cyber Neon Hex Grid)",
+            "شبكة خلايا نحل مستقبلية تتوهج بنبضات نيون رقمية زرقاء وفيروزية متتابعة."
+        ),
+        Triple(
+            WallpaperPreset.LIVE_HYPNOTIC_SPIRAL,
+            "10. دوامة طاقة متحدة المركز (Hypnotic Energy Waves)",
+            "حلقات وموجات هندسية متحدة المركز تتوسع وتنتشر بسلاسة فائقة وتتكرر باستمرار."
         )
     )
 
@@ -608,6 +633,31 @@ private fun WallpapersSection(
             WallpaperPreset.PURPLE_DEEP_BLUE,
             "الجديدة (الهندسية): بنفسجي وأزرق عميق",
             "تدرجات ورقية حديثة ذات ظلال ثلاثية الأبعاد أنيقة، متوازنة ومريحة للعين."
+        ),
+        Triple(
+            WallpaperPreset.CORAL_RED_PAPER,
+            "أندرويد 5: أوريغامي أحمر وقرمزي مادي (Coral Crimson Paper)",
+            "تدرجات ورقية قماشية حمراء وقرمزية دافئة تحاكي تصاميم لوليبوب الكلاسيكية الجذابة."
+        ),
+        Triple(
+            WallpaperPreset.OCEAN_EMERALD_WAVE,
+            "أندرويد 5: أمواج المحيط والزمرد (Ocean Emerald Layers)",
+            "طبقات هندسية بلون الزمرد ومياه المحيط الفيروزية العميقة مع ظلال ماتيريال رائعة."
+        ),
+        Triple(
+            WallpaperPreset.DESERT_GOLDEN_DUNE,
+            "أندرويد 5: رمال ذهبية وغروب صحراوي (Golden Desert Dunes)",
+            "ألوان شمسية دافئة مريحة للعين تمزج درجات الكهرمان والبرتقالي والذهبي المشرق."
+        ),
+        Triple(
+            WallpaperPreset.OBSIDIAN_NIGHT_SKY,
+            "أندرويد 5: أوريغامي ليلي داكن (Obsidian Midnight Origami)",
+            "تصميم ورقي ليلي مهدئ بدرجات الأسود الكربوني والأزرق الكحلي مع لمسات نيون."
+        ),
+        Triple(
+            WallpaperPreset.ROYAL_AMETHYST_POLY,
+            "أندرويد 5: بلورات الجمشت والبنفسجي الملكي (Royal Amethyst Crystals)",
+            "تداخلات هندسية بلورية بتدرجات الأرجواني والبنفسجي الفاخر لإطلالة راقية."
         ),
         Triple(
             WallpaperPreset.CYAN_GEOMETRIC,

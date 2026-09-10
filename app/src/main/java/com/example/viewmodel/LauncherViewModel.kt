@@ -343,6 +343,13 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             .map { if (it.pageIndex > pageIndex) it.copy(pageIndex = it.pageIndex - 1) else it }
         _homeShortcuts.value = updatedShortcuts
         repository.saveShortcuts(updatedShortcuts)
+
+        val updatedWidgets = _homeWidgets.value
+            .filter { it.pageIndex != pageIndex }
+            .map { if (it.pageIndex > pageIndex) it.copy(pageIndex = it.pageIndex - 1) else it }
+        _homeWidgets.value = updatedWidgets
+        repository.saveWidgets(updatedWidgets)
+
         updateConfig(_config.value.copy(pageCount = _config.value.pageCount - 1))
     }
 

@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,10 +44,26 @@ class MainActivity : ComponentActivity() {
     private var pendingWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
     private var pendingProviderInfo: AppWidgetProviderInfo? = null
 
+    private val widgetBindLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val provider = pendingProviderInfo
+        val widgetId = pendingWidgetId
+        if (result.resultCode == Activity.RESULT_OK && provider != null && widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            completeWidgetAddition(widgetId, provider)
+        } else if (pendingWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            try {
+                appWidgetHost.deleteAppWidgetId(pendingWidgetId)
+            } catch (ignored: Exception) {}
+            pendingWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+            pendingProviderInfo = null
+        }
+    }
+
     private val widgetConfigLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK && pendingProviderInfo != null) {
+        if (result.resultCode == Activity.RESULT_OK && pendingProviderInfo != null && pendingWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             val provider = pendingProviderInfo!!
             viewModel.addWidget(
                 HomeWidget(
@@ -57,6 +74,7 @@ class MainActivity : ComponentActivity() {
                     label = provider.loadLabel(packageManager) ?: "Widget"
                 )
             )
+            Toast.makeText(this, "تمت إضافة الودجت بنجاح", Toast.LENGTH_SHORT).show()
         } else if (pendingWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             try {
                 appWidgetHost.deleteAppWidgetId(pendingWidgetId)
@@ -150,28 +168,54 @@ class MainActivity : ComponentActivity() {
             }
 
             if (canBind) {
-                if (provider.configure != null) {
-                    pendingWidgetId = appWidgetId
-                    pendingProviderInfo = provider
-                    val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
-                        component = provider.configure
-                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                    }
-                    widgetConfigLauncher.launch(intent)
-                } else {
-                    viewModel.addWidget(
-                        HomeWidget(
-                            appWidgetId = appWidgetId,
-                            providerPackage = provider.provider.packageName,
-                            providerClass = provider.provider.className,
-                            pageIndex = 0,
-                            label = provider.loadLabel(packageManager) ?: "Widget"
-                        )
-                    )
+                completeWidgetAddition(appWidgetId, provider)
+            } else {
+                pendingWidgetId = appWidgetId
+                pendingProviderInfo = provider
+                val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider.provider)
                 }
+                widgetBindLauncher.launch(intent)
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            Toast.makeText(this, "تعذر إضافة هذا الودجت", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun completeWidgetAddition(appWidgetId: Int, provider: AppWidgetProviderInfo) {
+        try {
+            if (provider.configure != null) {
+                pendingWidgetId = appWidgetId
+                pendingProviderInfo = provider
+                val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE).apply {
+                    component = provider.configure
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                }
+                widgetConfigLauncher.launch(intent)
+            } else {
+                viewModel.addWidget(
+                    HomeWidget(
+                        appWidgetId = appWidgetId,
+                        providerPackage = provider.provider.packageName,
+                        providerClass = provider.provider.className,
+                        pageIndex = 0,
+                        label = provider.loadLabel(packageManager) ?: "Widget"
+                    )
+                )
+                pendingWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+                pendingProviderInfo = null
+                Toast.makeText(this, "تمت إضافة الودجت بنجاح", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            try {
+                appWidgetHost.deleteAppWidgetId(appWidgetId)
+            } catch (ignored: Exception) {}
+            pendingWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+            pendingProviderInfo = null
+            Toast.makeText(this, "حدث خطأ أثناء تهيئة الودجت", Toast.LENGTH_SHORT).show()
         }
     }
 

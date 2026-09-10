@@ -55,8 +55,11 @@ import com.example.ui.components.LollipopThemesDialog
 import com.example.ui.components.LollipopTouchRippleContainer
 import com.example.ui.components.LollipopWallpaper
 import com.example.ui.components.LollipopWidgetPickerDialog
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.rememberCoroutineScope
 import com.example.util.LollipopSoundEffects
 import com.example.viewmodel.LauncherViewModel
+import kotlinx.coroutines.launch
 
 /**
  * Root Home Screen for HUBlub Launcher.
@@ -123,6 +126,7 @@ fun HomeScreen(
         initialPage = 0,
         pageCount = { config.pageCount }
     )
+    val coroutineScope = rememberCoroutineScope()
 
     LollipopTouchRippleContainer(
         soundEnabled = config.soundEffectsEnabled,
@@ -275,15 +279,26 @@ fun HomeScreen(
                     ) {
                         repeat(config.pageCount) { page ->
                             val isSelected = pagerState.currentPage == page
-                            Canvas(
+                            Box(
                                 modifier = Modifier
                                     .padding(horizontal = 4.dp)
-                                    .size(6.dp)
+                                    .size(24.dp)
+                                    .clickable {
+                                        LollipopSoundEffects.playButtonClick()
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(page)
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
                             ) {
-                                drawCircle(
-                                    color = if (isSelected) Color.White else Color(0x66FFFFFF),
-                                    radius = size.minDimension / 2
-                                )
+                                Canvas(
+                                    modifier = Modifier.size(if (isSelected) 8.dp else 6.dp)
+                                ) {
+                                    drawCircle(
+                                        color = if (isSelected) Color.White else Color(0x66FFFFFF),
+                                        radius = size.minDimension / 2
+                                    )
+                                }
                             }
                         }
                     }
@@ -441,6 +456,8 @@ fun HomeScreen(
             LollipopSettingsDialog(
                 config = config,
                 onConfigChange = { viewModel.updateConfig(it) },
+                onAddPage = { viewModel.addPage() },
+                onRemovePage = { viewModel.removePage(it) },
                 onSetDefaultHome = { AppManager.openHomeSettings(context) },
                 onExportBackup = { viewModel.exportBackup() },
                 onRestoreBackup = { viewModel.restoreBackup(it) },

@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -44,6 +45,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -84,6 +86,8 @@ import com.example.util.LollipopSoundEffects
 fun LollipopSettingsDialog(
     config: LauncherConfig,
     onConfigChange: (LauncherConfig) -> Unit,
+    onAddPage: () -> Unit = {},
+    onRemovePage: (Int) -> Unit = {},
     onSetDefaultHome: () -> Unit,
     onExportBackup: () -> String,
     onRestoreBackup: (String) -> Boolean,
@@ -184,6 +188,128 @@ fun LollipopSettingsDialog(
                         checked = config.nostalgiaMode,
                         onCheckedChange = { onConfigChange(config.copy(nostalgiaMode = it)) }
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Home Screen Pages Management
+                    SectionHeader("HOMESCREEN PAGES (إدارة صفحات الشاشة الرئيسية)")
+
+                    Card(
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5F9)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "عدد الصفحات: ${config.pageCount} من 9",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTextPrimary
+                                )
+
+                                Text(
+                                    text = if (config.pageCount == 1) "صفحة رئيسية واحدة" else "${config.pageCount} صفحات",
+                                    fontSize = 12.sp,
+                                    color = LollipopTeal700
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // Action buttons: Add page / Remove last page
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = {
+                                        LollipopSoundEffects.playButtonClick()
+                                        onAddPage()
+                                    },
+                                    enabled = config.pageCount < 9,
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = LollipopTeal500),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("+ إضافة صفحة جديدة", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                }
+
+                                OutlinedButton(
+                                    onClick = {
+                                        LollipopSoundEffects.playButtonClick()
+                                        onRemovePage(config.pageCount - 1)
+                                    },
+                                    enabled = config.pageCount > 1,
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFD32F2F)),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("- إزالة الصفحة الأخيرة", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            if (config.pageCount > 1) {
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = "إزالة صفحة محددة:",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTextSecondary
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    for (p in 0 until config.pageCount) {
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = if (p == 0) LollipopTeal500.copy(alpha = 0.1f) else Color.White,
+                                            border = androidx.compose.foundation.BorderStroke(1.dp, if (p == 0) LollipopTeal500 else Color(0xFFCBD5E1)),
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.padding(vertical = 6.dp, horizontal = 2.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Text(
+                                                    text = if (p == 0) "الرئيسية" else "ص ${p + 1}",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTextPrimary
+                                                )
+                                                if (p > 0) {
+                                                    TextButton(
+                                                        onClick = {
+                                                            LollipopSoundEffects.playButtonClick()
+                                                            onRemovePage(p)
+                                                        },
+                                                        contentPadding = PaddingValues(0.dp),
+                                                        modifier = Modifier.height(24.dp)
+                                                    ) {
+                                                        Text("حذف", color = Color(0xFFD32F2F), fontSize = 10.sp)
+                                                    }
+                                                } else {
+                                                    Text(
+                                                        text = "ثابتة",
+                                                        fontSize = 10.sp,
+                                                        color = MaterialTextSecondary,
+                                                        modifier = Modifier.padding(vertical = 4.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 

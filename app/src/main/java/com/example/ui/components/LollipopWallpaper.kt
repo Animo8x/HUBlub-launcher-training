@@ -77,6 +77,61 @@ fun LollipopWallpaper(
                 WallpaperPreset.LIVE_COSMIC_GRID_WAVE -> {
                     DrawLiveCosmicGridWaveWallpaper()
                 }
+                WallpaperPreset.LIVE_FALLING_RAIN_DROPS -> {
+                    DrawLiveFallingRainWallpaper()
+                }
+                WallpaperPreset.LIVE_AURORA_BOREALIS -> {
+                    DrawLiveAuroraBorealisWallpaper()
+                }
+                WallpaperPreset.LIVE_STARLIGHT_GALAXY -> {
+                    DrawLiveStarlightGalaxyWallpaper()
+                }
+                WallpaperPreset.LIVE_CYBER_HEX_GRID -> {
+                    DrawLiveCyberHexGridWallpaper()
+                }
+                WallpaperPreset.LIVE_HYPNOTIC_SPIRAL -> {
+                    DrawLiveHypnoticSpiralWallpaper()
+                }
+                WallpaperPreset.CORAL_RED_PAPER -> {
+                    DrawGeometricWallpaper(
+                        baseColor = Color(0xFFB71C1C),
+                        layer1 = Color(0xFFD32F2F),
+                        layer2 = Color(0xFFFF5722),
+                        accent = Color(0xFFFFAB91)
+                    )
+                }
+                WallpaperPreset.OCEAN_EMERALD_WAVE -> {
+                    DrawGeometricWallpaper(
+                        baseColor = Color(0xFF004D40),
+                        layer1 = Color(0xFF00796B),
+                        layer2 = Color(0xFF009688),
+                        accent = Color(0xFF80CBC4)
+                    )
+                }
+                WallpaperPreset.DESERT_GOLDEN_DUNE -> {
+                    DrawGeometricWallpaper(
+                        baseColor = Color(0xFFE65100),
+                        layer1 = Color(0xFFF57C00),
+                        layer2 = Color(0xFFFFB300),
+                        accent = Color(0xFFFFE082)
+                    )
+                }
+                WallpaperPreset.OBSIDIAN_NIGHT_SKY -> {
+                    DrawGeometricWallpaper(
+                        baseColor = Color(0xFF0D1117),
+                        layer1 = Color(0xFF161B22),
+                        layer2 = Color(0xFF21262D),
+                        accent = Color(0xFF58A6FF)
+                    )
+                }
+                WallpaperPreset.ROYAL_AMETHYST_POLY -> {
+                    DrawGeometricWallpaper(
+                        baseColor = Color(0xFF311B92),
+                        layer1 = Color(0xFF4A148C),
+                        layer2 = Color(0xFF6A1B9A),
+                        accent = Color(0xFFBA68C8)
+                    )
+                }
                 WallpaperPreset.STOCK_LOLLIPOP -> {
                     Image(
                         painter = painterResource(id = R.drawable.bg_lollipop_default),
@@ -1131,6 +1186,359 @@ fun DrawLiveCosmicGridWaveWallpaper() {
                 start = Offset(colX, 0f),
                 end = Offset(colX, h),
                 strokeWidth = 1.2f
+            )
+        }
+    }
+}
+
+/**
+ * 6. Live Animated Wallpaper: Gentle Rain & Dew Drops (قطرات مطر وندى متساقطة)
+ * Translucent raindrops falling smoothly with soft ripples landing on misty water surface.
+ */
+@Composable
+fun DrawLiveFallingRainWallpaper() {
+    val transition = rememberInfiniteTransition(label = "FallingRain")
+    val rainProgress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 3500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rainProgress"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        // Deep serene aquatic night gradient
+        drawRect(
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFF04101A),
+                    Color(0xFF0A2235),
+                    Color(0xFF071927)
+                )
+            )
+        )
+
+        // 36 smooth falling drops with different horizontal positions, speeds, and lengths
+        val dropCount = 36
+        for (i in 0 until dropCount) {
+            val speedFactor = 0.8f + ((i * 17) % 10) * 0.06f
+            val xRatio = ((i * 37 + 13) % 100) / 100f
+            val startYRatio = ((i * 53) % 100) / 100f
+            val dropProgress = (rainProgress * speedFactor + startYRatio) % 1f
+            val dropLength = 25f + ((i * 11) % 25)
+            val dropX = w * xRatio
+            val dropY = h * dropProgress
+
+            // Raindrop trail
+            drawLine(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0f),
+                        Color(0xFF80D8FF).copy(alpha = 0.45f)
+                    ),
+                    startY = dropY - dropLength,
+                    endY = dropY
+                ),
+                start = Offset(dropX, dropY - dropLength),
+                end = Offset(dropX, dropY),
+                strokeWidth = 1.8f
+            )
+
+            // Landing ripples near bottom
+            if (dropProgress > 0.85f) {
+                val rippleProg = (dropProgress - 0.85f) / 0.15f
+                val rippleRadius = 25f * rippleProg
+                drawCircle(
+                    color = Color(0xFF80D8FF).copy(alpha = (1f - rippleProg) * 0.35f),
+                    radius = rippleRadius,
+                    center = Offset(dropX, h * 0.95f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.2f)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 7. Live Animated Wallpaper: Aurora Borealis Ribbon (شفق قطبي أورورا ناعم وموجي)
+ * Ethereal green, cyan, and violet curtains drifting across a polar starry night.
+ */
+@Composable
+fun DrawLiveAuroraBorealisWallpaper() {
+    val transition = rememberInfiniteTransition(label = "AuroraBorealis")
+    val waveOffset by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = (Math.PI * 2).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 10000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "waveOffset"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        drawRect(
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFF030814),
+                    Color(0xFF071428),
+                    Color(0xFF050D1A)
+                )
+            )
+        )
+
+        // Aurora ribbons
+        val layers = 4
+        for (l in 0 until layers) {
+            val baseY = h * (0.28f + l * 0.12f)
+            val ribbonColor = when (l) {
+                0 -> Color(0xFF00E676)
+                1 -> Color(0xFF1DE9B6)
+                2 -> Color(0xFF00E5FF)
+                else -> Color(0xFF7C4DFF)
+            }
+
+            val path = Path()
+            val step = 15f
+            var cx = 0f
+            while (cx <= w + step) {
+                val wave1 = Math.sin((cx * 0.003f + waveOffset + l * 0.9).toDouble()).toFloat() * (h * 0.045f)
+                val wave2 = Math.cos((cx * 0.006f - waveOffset * 0.7 + l).toDouble()).toFloat() * (h * 0.025f)
+                val y = baseY + wave1 + wave2
+                if (cx == 0f) path.moveTo(cx, y) else path.lineTo(cx, y)
+                cx += step
+            }
+            path.lineTo(w, h * 0.8f)
+            path.lineTo(0f, h * 0.8f)
+            path.close()
+
+            drawPath(
+                path = path,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        ribbonColor.copy(alpha = 0.35f),
+                        ribbonColor.copy(alpha = 0.05f),
+                        Color.Transparent
+                    ),
+                    startY = baseY - h * 0.05f,
+                    endY = baseY + h * 0.25f
+                )
+            )
+        }
+    }
+}
+
+/**
+ * 8. Live Animated Wallpaper: Starlight Sparkles & Galaxy Dust (بريق نجوم وجزيئات متلألئة)
+ * Infinite celestial dust and sparkling cosmic diamonds gently shimmering and drifting.
+ */
+@Composable
+fun DrawLiveStarlightGalaxyWallpaper() {
+    val transition = rememberInfiniteTransition(label = "StarlightGalaxy")
+    val pulse by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = (Math.PI * 2).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 6000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "pulse"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFF1B1438),
+                    Color(0xFF0B081B),
+                    Color(0xFF040209)
+                ),
+                center = Offset(w * 0.5f, h * 0.4f),
+                radius = h * 0.7f
+            )
+        )
+
+        // Nebula cloud
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFF7C4DFF).copy(alpha = 0.15f),
+                    Color(0xFF00E5FF).copy(alpha = 0.06f),
+                    Color.Transparent
+                ),
+                center = Offset(w * 0.6f, h * 0.45f),
+                radius = w * 0.6f
+            ),
+            radius = w * 0.6f,
+            center = Offset(w * 0.6f, h * 0.45f)
+        )
+
+        // 45 twinkling stars and sparkles
+        val starCount = 45
+        for (i in 0 until starCount) {
+            val sx = w * (((i * 43 + 19) % 100) / 100f)
+            val sy = h * (((i * 67 + 31) % 100) / 100f)
+            val starPhase = pulse + i * 0.7f
+            val brightness = 0.25f + 0.65f * Math.abs(Math.sin(starPhase.toDouble())).toFloat()
+            val radius = 1.8f + ((i % 5) * 0.7f)
+
+            drawCircle(
+                color = Color.White.copy(alpha = brightness),
+                radius = radius,
+                center = Offset(sx, sy)
+            )
+
+            // Diamond sparkle cross for larger stars
+            if (i % 6 == 0) {
+                val crossLen = 7f * brightness
+                drawLine(
+                    color = Color(0xFF80D8FF).copy(alpha = brightness * 0.8f),
+                    start = Offset(sx - crossLen, sy),
+                    end = Offset(sx + crossLen, sy),
+                    strokeWidth = 1.0f
+                )
+                drawLine(
+                    color = Color(0xFF80D8FF).copy(alpha = brightness * 0.8f),
+                    start = Offset(sx, sy - crossLen),
+                    end = Offset(sx, sy + crossLen),
+                    strokeWidth = 1.0f
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 9. Live Animated Wallpaper: Cyber Neon Hex Grid (خلايا نيون سداسية نابضة متكررة)
+ * Rhythmic pulsing cyber honeycomb matrix with luminous geometric lines.
+ */
+@Composable
+fun DrawLiveCyberHexGridWallpaper() {
+    val transition = rememberInfiniteTransition(label = "CyberHexGrid")
+    val pulse by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = (Math.PI * 2).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 7000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "pulse"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        drawRect(
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFF080D1A),
+                    Color(0xFF0F172A),
+                    Color(0xFF050811)
+                )
+            )
+        )
+
+        val hexRadius = 55f
+        val hexWidth = Math.sqrt(3.0).toFloat() * hexRadius
+        val hexHeight = hexRadius * 1.5f
+
+        val cols = (w / hexWidth).toInt() + 2
+        val rows = (h / hexHeight).toInt() + 2
+
+        for (r in -1..rows) {
+            val y = r * hexHeight
+            val offsetX = if (r % 2 == 0) hexWidth / 2f else 0f
+            for (c in -1..cols) {
+                val x = c * hexWidth + offsetX
+                val distCenter = Math.hypot((x - w / 2).toDouble(), (y - h / 2).toDouble()).toFloat()
+                val hexPhase = pulse - distCenter * 0.004f
+                val alpha = 0.08f + 0.16f * Math.max(0.0, Math.sin(hexPhase.toDouble())).toFloat()
+
+                val path = Path()
+                for (k in 0 until 6) {
+                    val angleRad = Math.toRadians((60 * k - 30).toDouble())
+                    val px = x + (hexRadius * 0.92f * Math.cos(angleRad)).toFloat()
+                    val py = y + (hexRadius * 0.92f * Math.sin(angleRad)).toFloat()
+                    if (k == 0) path.moveTo(px, py) else path.lineTo(px, py)
+                }
+                path.close()
+
+                drawPath(
+                    path = path,
+                    color = Color(0xFF00E5FF).copy(alpha = alpha),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.3f)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 10. Live Animated Wallpaper: Hypnotic Energy Waves (موجات دوامة طاقة متحدة المركز ناعمة)
+ * Smooth concentric geometric rings continuously radiating outward and dissolving gracefully.
+ */
+@Composable
+fun DrawLiveHypnoticSpiralWallpaper() {
+    val transition = rememberInfiniteTransition(label = "HypnoticSpiral")
+    val expandProgress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 6500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "expandProgress"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+        val cx = w / 2f
+        val cy = h / 2f
+        val maxRadius = Math.max(w, h) * 0.75f
+
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFF1A0933),
+                    Color(0xFF0D041A),
+                    Color(0xFF05010A)
+                ),
+                center = Offset(cx, cy),
+                radius = maxRadius
+            )
+        )
+
+        val ringCount = 12
+        for (i in 0 until ringCount) {
+            val ringProg = (expandProgress + i.toFloat() / ringCount) % 1f
+            val radius = ringProg * maxRadius
+            val alpha = (1f - ringProg) * 0.45f * Math.sin((ringProg * Math.PI).toDouble()).toFloat()
+
+            val ringColor = when (i % 4) {
+                0 -> Color(0xFFE040FB)
+                1 -> Color(0xFF7C4DFF)
+                2 -> Color(0xFF00E5FF)
+                else -> Color(0xFFFF4081)
+            }
+
+            drawCircle(
+                color = ringColor.copy(alpha = alpha),
+                radius = radius,
+                center = Offset(cx, cy),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.4f)
             )
         }
     }
